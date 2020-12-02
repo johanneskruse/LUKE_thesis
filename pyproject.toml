@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "luke"
+version = "0.1.0"
+description = ""
+authors = ["Ikuya Yamada <ikuya@ousia.jp>"]
+
+[tool.poetry.dependencies]
+python = "^3.6.1"
+Click = "*"
+joblib = "*"
+marisa-trie = "*"
+numpy = "*"
+sentencepiece = "*"
+tensorflow = "*"
+torch = "*"
+transformers = "*"
+tqdm = "*"
+ujson = "*"
+wikipedia2vec = "*"
+comet-ml = { version = "*", optional = true }
+seqeval = { version = "*", optional = true }
+pyjnius = {version = "*", optional = true}
+pyicu = {version = "*", optional = true}
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+flake8 = "^3.8.3"
+black = "^19.10b0"
+mypy = "^0.780"
+pre-commit = "^2.5.1"
+
+[tool.poetry.extras]
+examples = ["comet-ml", "optuna", "seqeval"]
+icu = ["pyicu"]
+opennlp = ["pyjnius"]
+
+[tool.poetry.scripts]
+luke = 'luke.cli:cli'
+
+[tool.black]
+line-length = 120
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
