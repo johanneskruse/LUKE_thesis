@@ -16,6 +16,8 @@ from ..utils.trainer import Trainer, trainer_args
 from .model import LukeForEntityTyping
 from .utils import ENTITY_TOKEN, convert_examples_to_features, DatasetProcessor
 
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,7 +64,7 @@ def run(common_args, **task_args):
         model = LukeForEntityTyping(args, num_labels)
         model.load_state_dict(args.model_weights, strict=False)
         model.to(args.device)
-
+        
         num_train_steps_per_epoch = len(train_dataloader) // args.gradient_accumulation_steps
         num_train_steps = int(num_train_steps_per_epoch * args.num_train_epochs)
 
@@ -119,7 +121,7 @@ def run(common_args, **task_args):
     return results
 
 
-def evaluate(args, model, fold="dev", output_file=None):
+def evaluate(args, model, fold="dev", output_file=None, write_all=True):
     dataloader, _, _, label_list = load_and_cache_examples(args, fold=fold)
     model.eval()
 
@@ -138,16 +140,55 @@ def evaluate(args, model, fold="dev", output_file=None):
 
     all_predicted_indexes = []
     all_label_indexes = []
+    
+    all_predicted_prob = []
+
+    def logit_to_prob(logits):
+        # Softmax function 
+        softmax = []
+        for i in logits:
+            softmax.append(np.exp(i) / sum(np.exp(logits)))
+        return softmax
+
     for logits, labels in zip(all_logits, all_labels):
         all_predicted_indexes.append([i for i, v in enumerate(logits) if v > 0])
         all_label_indexes.append([i for i, v in enumerate(labels) if v > 0])
 
+        all_predicted_prob.append([logit_to_prob(logits)])
+
+    if write_all:
+
+        if not os.path.exists(args.output_dir + "/all_files"):
+            os.mkdir(args.output_dir + "/all_files")
+
+        with open(os.path.join(args.output_dir, "all_files", 'all_predicted_indexes.txt'), 'w') as outfile:
+            json.dump(all_predicted_indexes, outfile)
+
+        with open(os.path.join(args.output_dir, "all_files",'all_label_indexes.txt'), 'w') as outfile:
+            json.dump(all_label_indexes, outfile)
+
+        with open(os.path.join(args.output_dir, "all_files", 'all_logits.txt'), 'w') as outfile:
+            json.dump(all_logits, outfile)
+
+        with open(os.path.join(args.output_dir, "all_files", 'all_labels.txt'), 'w') as outfile:
+            json.dump(all_labels, outfile)
+    
+        with open(os.path.join(args.output_dir, "all_files", 'all_predicted_prob.txt'), 'w') as outfile:
+            json.dump(all_predicted_prob, outfile)
+
+        with open(os.path.join(args.output_dir, "all_files", 'label_list.txt'), 'w') as outfile:
+            json.dump(label_list, outfile)
+
     if output_file:
         with open(output_file, "w") as f:
-            for predicted_indexes, label_indexes in zip(all_predicted_indexes, all_label_indexes):
+            for predicted_indexes, label_indexes, prediction_prob, logits_all in zip(all_predicted_indexes, all_label_indexes, all_predicted_prob, all_logits):
                 data = dict(
                     predictions=[label_list[ind] for ind in predicted_indexes],
                     labels=[label_list[ind] for ind in label_indexes],
+                    prediction_highest=[label_list[pred_prob.index(max(pred_prob))] for pred_prob in prediction_prob],
+                    prediction_probability=[max(pred_prob) for pred_prob in prediction_prob],
+                    prediction_probability_all=[pred_prob for pred_prob in prediction_prob],
+                    #prediction_logits_all=[logit for logit in logits_all],
                 )
                 f.write(json.dumps(data) + "\n")
 
