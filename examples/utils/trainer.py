@@ -86,6 +86,9 @@ class Trainer(object):
 
         model.train()
 
+        training_loss = []
+        training_losses = {}
+
         with tqdm(total=self.num_train_steps, disable=self.args.local_rank not in (-1, 0)) as pbar:
             while True:
                 for step, batch in enumerate(self.dataloader):
@@ -118,6 +121,8 @@ class Trainer(object):
                         pbar.update()
                         global_step += 1
 
+                        training_loss.append(loss.item())
+
                         if self.step_callback is not None:
                             self.step_callback(model, global_step)
 
@@ -137,13 +142,15 @@ class Trainer(object):
                         if global_step == self.num_train_steps:
                             break
 
+                training_losses["training_loss"] = training_loss
+
                 if global_step == self.num_train_steps:
                     break
                 epoch += 1
 
         logger.info("global_step = %s, average loss = %s", global_step, tr_loss / global_step)
-
-        return model, global_step, tr_loss / global_step
+        
+        return model, global_step, tr_loss / global_step, training_losses
 
     def _create_optimizer(self, model):
         param_optimizer = list(model.named_parameters())

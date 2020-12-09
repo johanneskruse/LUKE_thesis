@@ -59,6 +59,7 @@ def run(common_args, **task_args):
     num_labels = len(features[0].labels)
 
     results = {}
+    dev_loss = []
 
     if args.do_train:
         model = LukeForEntityTyping(args, num_labels)
@@ -88,11 +89,21 @@ def run(common_args, **task_args):
                     results["best_epoch"] = epoch
 
                 model.train()
+                
 
         trainer = Trainer(
             args, model=model, dataloader=train_dataloader, num_train_steps=num_train_steps, step_callback=step_callback
         )
-        trainer.train()
+        
+        _, _, _, training_losses = trainer.train()
+
+        training_losses["batch_size"] = args.train_batch_size
+        training_losses["epochs"] = args.num_train_epochs
+
+
+        with open(os.path.join(args.output_dir, f'training_losses.json'), 'w') as outfile:
+            json.dump(training_losses, outfile)
+    
 
     if args.do_train and args.local_rank in (0, -1):
         logger.info("Saving the model checkpoint to %s", args.output_dir)
@@ -121,7 +132,7 @@ def run(common_args, **task_args):
     return results
 
 
-def evaluate(args, model, fold="dev", output_file=None, write_all=True):
+def evaluate(args, model, fold="dev", output_file=None, write_all=False):
     dataloader, _, _, label_list = load_and_cache_examples(args, fold=fold)
     model.eval()
 
