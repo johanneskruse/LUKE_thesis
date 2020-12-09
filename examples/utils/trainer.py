@@ -150,6 +150,8 @@ class Trainer(object):
 
         logger.info("global_step = %s, average loss = %s", global_step, tr_loss / global_step)
         
+        logger.info("global_step = %s, tr = %s", global_step, tr_loss)
+
         return model, global_step, tr_loss / global_step, training_losses
 
     def _create_optimizer(self, model):

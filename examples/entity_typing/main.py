@@ -43,7 +43,6 @@ def run(common_args, **task_args):
     set_seed(args.seed)
 
     args.experiment.log_parameters({p.name: getattr(args, p.name) for p in run.params})
-
     args.model_config.vocab_size += 1
     word_emb = args.model_weights["embeddings.word_embeddings.weight"]
     marker_emb = word_emb[args.tokenizer.convert_tokens_to_ids(["@"])[0]].unsqueeze(0)
@@ -97,13 +96,6 @@ def run(common_args, **task_args):
         
         _, _, _, training_losses = trainer.train()
 
-        training_losses["batch_size"] = args.train_batch_size
-        training_losses["epochs"] = args.num_train_epochs
-
-
-        with open(os.path.join(args.output_dir, f'training_losses.json'), 'w') as outfile:
-            json.dump(training_losses, outfile)
-    
 
     if args.do_train and args.local_rank in (0, -1):
         logger.info("Saving the model checkpoint to %s", args.output_dir)
@@ -124,7 +116,17 @@ def run(common_args, **task_args):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
             results.update({f"{eval_set}_{k}": v for k, v in evaluate(args, model, eval_set, output_file).items()})
 
+    # Print results: 
     logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
+
+
+    # Adding training losses and experimental configurations information: 
+    results["experimental_configurations"] = {
+                                            "log_parameters": {p.name: getattr(args, p.name) for p in run.params}, 
+                                            "model_config": vars(args.model_config)
+                                            }
+    results.update(training_losses)
+    
     args.experiment.log_metrics(results)
     with open(os.path.join(args.output_dir, "results.json"), "w") as f:
         json.dump(results, f)
