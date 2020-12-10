@@ -126,3 +126,16 @@ def convert_examples_to_features(examples, label_list, tokenizer, max_mention_le
         )
 
     return features
+
+
+def data_set_size(datasets):
+    for dataset in datasets:
+        data_dir = os.path.join(os.getcwd(), "OpenEntity", dataset)
+        
+        if not os.path.exists(data_dir):
+            continue
+
+        with open(data_dir) as json_file:
+            data_OE = json.load(json_file)
+
+        print(f"{dataset}: {len(data_OE)}" )

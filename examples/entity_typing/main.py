@@ -57,8 +57,12 @@ def run(common_args, **task_args):
     train_dataloader, _, features, _ = load_and_cache_examples(args, fold="train")
     num_labels = len(features[0].labels)
 
+    # Reduce training size function here: 
+    
     results = {}
-    dev_loss = []
+
+    dataset_size = {}
+    dataset_size["training_samples"] = len(features)
 
     if args.do_train:
         model = LukeForEntityTyping(args, num_labels)
@@ -74,7 +78,7 @@ def run(common_args, **task_args):
         def step_callback(model, global_step):
             if global_step % num_train_steps_per_epoch == 0 and args.local_rank in (0, -1):
                 epoch = int(global_step / num_train_steps_per_epoch - 1)
-                dev_results = evaluate(args, model, fold="dev")
+                dev_results, _ = evaluate(args, model, fold="dev")
                 args.experiment.log_metrics({f"dev_{k}_epoch{epoch}": v for k, v in dev_results.items()}, epoch=epoch)
                 results.update({f"dev_{k}_epoch{epoch}": v for k, v in dev_results.items()})
                 tqdm.write("dev: " + str(dev_results))
@@ -94,7 +98,7 @@ def run(common_args, **task_args):
             args, model=model, dataloader=train_dataloader, num_train_steps=num_train_steps, step_callback=step_callback
         )
         
-        _, _, _, training_losses = trainer.train()
+        _, global_step, average_loss, training_loss = trainer.train()
 
 
     if args.do_train and args.local_rank in (0, -1):
@@ -114,18 +118,24 @@ def run(common_args, **task_args):
 
         for eval_set in ("dev", "test"):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
-            results.update({f"{eval_set}_{k}": v for k, v in evaluate(args, model, eval_set, output_file).items()})
+            result_dict, sample_size = evaluate(args, model, eval_set, output_file)
+            results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
+            
+            dataset_size[f"{eval_set}_samples"] = sample_size
 
     # Print results: 
     logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
-
-
+    
     # Adding training losses and experimental configurations information: 
     results["experimental_configurations"] = {
                                             "log_parameters": {p.name: getattr(args, p.name) for p in run.params}, 
                                             "model_config": vars(args.model_config)
                                             }
-    results.update(training_losses)
+    results["experimental_configurations"]["log_parameters"]["training_set"]    = len(features)
+    results["experimental_configurations"]["log_parameters"]["global_step"]     = global_step
+    results["experimental_configurations"]["log_parameters"]["average_loss"]    = average_loss
+    results["experimental_configurations"]["log_parameters"].update(dataset_size)
+    results["training_loss"] = training_loss
     
     args.experiment.log_metrics(results)
     with open(os.path.join(args.output_dir, "results.json"), "w") as f:
@@ -135,7 +145,7 @@ def run(common_args, **task_args):
 
 
 def evaluate(args, model, fold="dev", output_file=None, write_all=False):
-    dataloader, _, _, label_list = load_and_cache_examples(args, fold=fold)
+    dataloader, _, features, label_list = load_and_cache_examples(args, fold=fold)
     model.eval()
 
     all_logits = []
@@ -170,25 +180,18 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
         all_predicted_prob.append([logit_to_prob(logits)])
 
     if write_all:
-
         if not os.path.exists(args.output_dir + "/all_files"):
             os.mkdir(args.output_dir + "/all_files")
-
         with open(os.path.join(args.output_dir, "all_files", 'all_predicted_indexes.txt'), 'w') as outfile:
             json.dump(all_predicted_indexes, outfile)
-
         with open(os.path.join(args.output_dir, "all_files",'all_label_indexes.txt'), 'w') as outfile:
             json.dump(all_label_indexes, outfile)
-
         with open(os.path.join(args.output_dir, "all_files", 'all_logits.txt'), 'w') as outfile:
             json.dump(all_logits, outfile)
-
         with open(os.path.join(args.output_dir, "all_files", 'all_labels.txt'), 'w') as outfile:
             json.dump(all_labels, outfile)
-    
         with open(os.path.join(args.output_dir, "all_files", 'all_predicted_prob.txt'), 'w') as outfile:
             json.dump(all_predicted_prob, outfile)
-
         with open(os.path.join(args.output_dir, "all_files", 'label_list.txt'), 'w') as outfile:
             json.dump(label_list, outfile)
 
@@ -225,7 +228,7 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
     else:
         f1 = 2 * precision * recall / (precision + recall)
 
-    return dict(precision=precision, recall=recall, f1=f1)
+    return dict(precision=precision, recall=recall, f1=f1), len(all_label_indexes)
 
 
 def load_and_cache_examples(args, fold="train"):

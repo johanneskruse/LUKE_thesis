@@ -71,6 +71,7 @@ class Trainer(object):
         epoch = 0
         global_step = 0
         tr_loss = 0.0
+        training_loss = []
 
         num_workers = torch.cuda.device_count()
 
@@ -85,9 +86,6 @@ class Trainer(object):
                 return contextlib.ExitStack()
 
         model.train()
-
-        training_loss = []
-        training_losses = {}
 
         with tqdm(total=self.num_train_steps, disable=self.args.local_rank not in (-1, 0)) as pbar:
             while True:
@@ -106,6 +104,8 @@ class Trainer(object):
                             loss.backward()
 
                     tr_loss += loss.item()
+                    training_loss.append(loss.item())
+
                     if (step + 1) % self.args.gradient_accumulation_steps == 0:
                         if self.args.max_grad_norm != 0.0:
                             if self.args.fp16:
@@ -120,8 +120,6 @@ class Trainer(object):
                         pbar.set_description("epoch: %d loss: %.7f" % (epoch, loss.item()))
                         pbar.update()
                         global_step += 1
-
-                        training_loss.append(loss.item())
 
                         if self.step_callback is not None:
                             self.step_callback(model, global_step)
@@ -142,17 +140,13 @@ class Trainer(object):
                         if global_step == self.num_train_steps:
                             break
 
-                training_losses["training_loss"] = training_loss
-
                 if global_step == self.num_train_steps:
                     break
                 epoch += 1
 
         logger.info("global_step = %s, average loss = %s", global_step, tr_loss / global_step)
         
-        logger.info("global_step = %s, tr = %s", global_step, tr_loss)
-
-        return model, global_step, tr_loss / global_step, training_losses
+        return model, global_step, tr_loss / global_step, training_loss
 
     def _create_optimizer(self, model):
         param_optimizer = list(model.named_parameters())
