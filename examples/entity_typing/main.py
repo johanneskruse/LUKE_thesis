@@ -25,7 +25,6 @@ logger = logging.getLogger(__name__)
 def cli():
     pass
 
-
 @cli.command()
 @click.option("--data-dir", default="data/open_entity", type=click.Path(exists=True))
 @click.option("--do-train/--no-train", default=True)
@@ -100,7 +99,6 @@ def run(common_args, **task_args):
         
         _, global_step, average_loss, training_loss = trainer.train()
 
-
     if args.do_train and args.local_rank in (0, -1):
         logger.info("Saving the model checkpoint to %s", args.output_dir)
         torch.save(best_weights[0], os.path.join(args.output_dir, WEIGHTS_NAME))
@@ -120,23 +118,29 @@ def run(common_args, **task_args):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
             result_dict, sample_size = evaluate(args, model, eval_set, output_file)
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
-            
             dataset_size[f"{eval_set}_samples"] = sample_size
+
 
     # Print results: 
     logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
+    
+    # Removing model bin: 
+    if not args.save_model: 
+        os.remove(os.path.join(args.output_dir, "pytorch_model.bin"))
+        logger.info("Removing pytorch_model.bin")
     
     # Adding training losses and experimental configurations information: 
     results["experimental_configurations"] = {
                                             "log_parameters": {p.name: getattr(args, p.name) for p in run.params}, 
                                             "model_config": vars(args.model_config)
                                             }
-    results["experimental_configurations"]["log_parameters"]["training_set"]    = len(features)
     results["experimental_configurations"]["log_parameters"]["global_step"]     = global_step
     results["experimental_configurations"]["log_parameters"]["average_loss"]    = average_loss
+    results["experimental_configurations"]["log_parameters"]["output_dir"]      = args.output_dir
     results["experimental_configurations"]["log_parameters"].update(dataset_size)
     results["training_loss"] = training_loss
-    
+
+    # Save and output final json file with all information: 
     args.experiment.log_metrics(results)
     with open(os.path.join(args.output_dir, "results.json"), "w") as f:
         json.dump(results, f)
