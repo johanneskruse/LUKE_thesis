@@ -1,9 +1,9 @@
 #!/bin/sh
 ### General options
 ### –- specify queue --
-#BSUB -q LUKE_experiments
+#BSUB -q gpuv100
 ### -- set the job Name --
-#BSUB -J testjob
+#BSUB -J LUKE_exp
 ### -- ask for number of cores (default: 1) --
 #BSUB -n 4
 ### -- specify that the cores must be on the same host -- 
@@ -33,4 +33,4 @@
 source ~/.bashrc
 conda activate luke
 
-python executable_file.py 
+python luke_experiment/experiment_setup_file.py 

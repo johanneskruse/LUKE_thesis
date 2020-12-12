@@ -1,9 +1,7 @@
-import os
-
-import subprocess
-
 '''
 This script is made for running the command prompts inside a python script for running multiple experiments. 
+
+To change parameter: data-dir = data_dir, num-train-epochs = num_train_epochs, etc. 
 
     # examples/utils/trainer.py: 
     @click.option("--data-dir", default="data/open_entity", type=click.Path(exists=True))
@@ -33,28 +31,37 @@ This script is made for running the command prompts inside a python script for r
     @click.option("--save-model/--dont-save-model", is_flag=True)
 '''
 
-### Parameters of interest: 
-model_file = "luke_large_500k.tar.gz"
-output_dir = "data/output/OpenEntity"
+import os
+import subprocess
 
-data_dir = "data/OpenEntity"
+# Path parameters: 
+model_file  = "luke_large_500k.tar.gz"
+data_dir    = "data/OpenEntity"
+output_dir  = "data/outputs/OpenEntity"
+
+### Hyperparameters: 
 train_batch_size = 4
 gradient_accumulation_steps = 2 # default 1 
 learning_rate = 1e-5
-num_train_epochs = 5
-seed = [12,13,14,15,16]
+num_train_epochs = 10
+seed = list(range(10,20))
 saving_model = "dont-save-model"
 
-# Executable (** OBS " " [space] for each line): 
+# Naming: 
+experiment_tag = "seed"
+
+# # ============
+
+# Experiment: 
 for i, seed_loop in enumerate(seed): 
 
-    print(f"Robustness for seed: {i+1}/{len(seed)}")
-
-    temp_output_dir = os.path.join(output_dir, f"robustness_seed_{seed_loop}")
-
-    if not os.path.exists(temp_output_dir):
-        os.mkdir(temp_output_dir)
-
+    temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{seed_loop}")
+    
+    if os.path.exists(temp_output_dir): 
+        continue 
+        # examples/cli.py -> makes output_dir
+    
+    # Terminal command: 
     subprocess.call((
         f"python", "-m",
         f"examples.cli", 
@@ -71,5 +78,10 @@ for i, seed_loop in enumerate(seed):
         f"--{saving_model}"
     ))
 
-    #os.system(f"python -m examples.cli --model-file={model_file} --output-dir={output_dir} entity-typing run --data-dir={data_dir} --fp16 --train-batch-size={train_batch_size} --gradient-accumulation-steps={gradient_accumulation_steps} --learning-rate={learning_rate} --num-train-epochs={num_train_epochs} --seed={seed_loop} --{saving_model}")
+# Move: out and err files: 
+out_err_folder = "luke_experiment/out_err_folder_hpc"
+if not os.path.exists(f"{out_err_folder}"):
+    os.makedirs(f"{out_err_folder}")
 
+os.system(f"mv luke_experiment/*.err {out_err_folder}")
+os.system(f"mv luke_experiment/*.out {out_err_folder}")

@@ -4,16 +4,16 @@ import json
 import os
 import numpy as np
 
-#from config import *
-
-# data_path           = config.output_files
-# results_file        = config.results_file
-# tensorboard_folder  = config.tensorboard_folder
 
 
-tensorboard_folder = "runs_tensorboards"
+
+# Path to data: 
+data_dir = "data/outputs/OpenEntity"
+# Output tensorboard event file: 
+tensorboard_event_folder = "luke_experiment/runs_tensorboards"
+# File to look for: 
 results_file = "results.json"
-data_path = "data/outputs"
+
 
 # ==============================================================================
 # Tensorboards for experiments 
@@ -23,7 +23,13 @@ data_path = "data/outputs"
 # ==============================================================================
 # ############### Robusted based on seeds ###############
 
-tag = "Robustness_Seed"
+# Def function for "experimental_tag"
+
+
+# Tag used for the tensorboard: 
+
+experiment_tag = "seed"
+tag_tensorboard = f"Robustness_{experiment_tag}"
 
 for root, dirs, files in os.walk(data_path):
     
@@ -41,7 +47,7 @@ for root, dirs, files in os.walk(data_path):
         gradient_accumulation_steps = log_parameters["gradient_accumulation_steps"]
         
         # Sanity check to only have one event file per experiment
-        if os.path.exists(f"{tensorboard_folder}/{base_root}"):
+        if os.path.exists(f"{tensorboard_event_folder}/{base_root}"):
             continue
 
         # Get parameters to model: 
@@ -57,20 +63,20 @@ for root, dirs, files in os.walk(data_path):
         dev_f1_tensor = torch.tensor(dev_f1[:-1])
 
         # Generate TensorBoards: 
-        tb = SummaryWriter(log_dir = f"{tensorboard_folder}/{base_root}")
+        tb = SummaryWriter(log_dir = f"{tensorboard_event_folder}/{base_root}")
 
         # Plot loss: 
         for step, loss in enumerate(training_loss_tensor):
-            tb.add_scalar(f"{tag}/00.Loss/Train", scalar_value=training_loss_tensor[step], global_step=step)
+            tb.add_scalar(f"{tag_tensorboard}/00.Loss/Train", scalar_value=training_loss_tensor[step], global_step=step)
         
         for epoch, recall in enumerate(dev_f1_tensor):
-            tb.add_scalar(f"{tag}/01.F1/development", scalar_value=dev_f1_tensor[epoch], global_step=epoch)
+            tb.add_scalar(f"{tag_tensorboard}/01.F1/development", scalar_value=dev_f1_tensor[epoch], global_step=epoch)
         
         for epoch, precision in enumerate(dev_precision_tensor):
-            tb.add_scalar(f"{tag}/02.Precision/development", scalar_value=dev_precision_tensor[epoch], global_step=epoch)
+            tb.add_scalar(f"{tag_tensorboard}/02.Precision/development", scalar_value=dev_precision_tensor[epoch], global_step=epoch)
         
         for epoch, recall in enumerate(dev_recall_tensor):
-            tb.add_scalar(f"{tag}/03.Recall/development", scalar_value=dev_recall_tensor[epoch], global_step=epoch)
+            tb.add_scalar(f"{tag_tensorboard}/03.Recall/development", scalar_value=dev_recall_tensor[epoch], global_step=epoch)
         
         tb.close()
 
