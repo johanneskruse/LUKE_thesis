@@ -49,7 +49,7 @@ learning_rate = 1e-5 # [1e-1, 1e-2, 1e-3, ...]
 num_train_epochs = 10
 seed = 12 # list(range(10,21,1))
 saving_model = "dont-save-model"
-train_frac_size = np.round(np.arange(0.2, 2.2, 0.2),2)
+train_frac_size = 1.0 # np.round(np.arange(0.2, 2.2, 0.2),2)
 
 # ========================================================================
 # Naming: 

@@ -131,6 +131,20 @@ Wikipedia data files specified in the following command (i.e.,
 python -m examples.cli --num-gpus=8 --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> reading-comprehension run --data-dir=<DATA_DIR> --wiki-link-db-file=enwiki_20160305.pkl --model-redirects-file=enwiki_20181220_redirects.pkl --link-redirects-file=enwiki_20160305_redirects.pkl --fp16 --no-negative --train-batch-size=2 --gradient-accumulation-steps=3 --learning-rate=15e-6 --num-train-epochs=2
 ```
 
+
+**Tensorboard generation:**
+
+To generate the event files for Tensorboard run: 
+```bash
+python -m luke_tensorboard.tensorboards_event_files --data-dir data/outputs/OpenEntity --tensorboard-event-folder luke_tensorboard/runs_tensorboards
+```
+
+**Run the Tensorboard:**
+
+```bash
+tensorboard --logdir luke_tensorboard/runs_tensorboards
+```
+
 ## Citation
 
 If you use LUKE in your work, please cite the
@@ -149,3 +163,6 @@ If you use LUKE in your work, please cite the
 
 Please submit a GitHub issue or send an e-mail to Ikuya Yamada
 (`ikuya@ousia.jp`) for help or issues using LUKE.
+
+
+
