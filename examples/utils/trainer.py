@@ -28,6 +28,7 @@ def trainer_args(func):
     @click.option("--fp16-max-loss-scale", default=4)
     @click.option("--save-steps", default=0)
     @click.option("--save-model/--dont-save-model", is_flag=True)
+    @click.option("--train-frac-size", default=1.0, type=float)
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         return func(*args, **kwargs)

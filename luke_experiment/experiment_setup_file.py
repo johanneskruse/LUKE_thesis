@@ -29,10 +29,13 @@ To change parameter: data-dir = data_dir, num-train-epochs = num_train_epochs, e
     @click.option("--fp16-max-loss-scale", default=4)
     @click.option("--save-steps", default=0)
     @click.option("--save-model/--dont-save-model", is_flag=True)
+
 '''
 
+# ========================================================================
 import os
 import subprocess
+import numpy as np
 
 # Path parameters: 
 model_file  = "luke_large_500k.tar.gz"
@@ -40,22 +43,29 @@ data_dir    = "data/OpenEntity"
 output_dir  = "data/outputs/OpenEntity"
 
 ### Hyperparameters: 
-train_batch_size = 4
+train_batch_size = 4 # list(range(2,22,2))
 gradient_accumulation_steps = 2 # default 1 
-learning_rate = 1e-5
+learning_rate = 1e-5 # [1e-1, 1e-2, 1e-3, ...]
 num_train_epochs = 10
-seed = list(range(10,20))
+seed = 12 # list(range(10,21,1))
 saving_model = "dont-save-model"
+train_frac_size = np.round(np.arange(0.2, 2.2, 0.2),2)
 
+# ========================================================================
 # Naming: 
-experiment_tag = "seed"
+experiment_tag = "train_frac_size"
 
-# # ============
+# Item to loop though:
+loop_items = train_frac_size
 
 # Experiment: 
-for i, seed_loop in enumerate(seed): 
+for loop_item in loop_items: 
 
-    temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{seed_loop}")
+    if type(loop_item) is np.float64:
+        loop_item _str = str(loop_item).replace(".", "_")
+        temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{loop_item_str}")
+    else:
+        temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{loop_item}")
     
     if os.path.exists(temp_output_dir): 
         continue 
@@ -65,23 +75,26 @@ for i, seed_loop in enumerate(seed):
     subprocess.call((
         f"python", "-m",
         f"examples.cli", 
-        f"--model-file={model_file}", 
+        f"--model-file={model_file}",
         f"--output-dir={temp_output_dir}",
         f"entity-typing", "run",
         f"--data-dir={data_dir}",
         f"--fp16",
-        f"--train-batch-size={train_batch_size}",
+        f"--seed={seed}",
+        f"--{saving_model}",
+        f"--num-train-epochs={num_train_epochs}", 
         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
+        f"--train-batch-size={train_batch_size}", # loop_item -> train_batch_size
         f"--learning-rate={learning_rate}",
-        f"--num-train-epochs={num_train_epochs}",
-        f"--seed={seed_loop}",
-        f"--{saving_model}"
+        f"--train-frac-size={loop_item}" # loop_item -> train_batch_size
     ))
+
 
 # Move: out and err files: 
 out_err_folder = "luke_experiment/out_err_folder_hpc"
 if not os.path.exists(f"{out_err_folder}"):
     os.makedirs(f"{out_err_folder}")
 
-os.system(f"mv luke_experiment/*.err {out_err_folder}")
-os.system(f"mv luke_experiment/*.out {out_err_folder}")
+
+os.system(f"mv *.err {out_err_folder}")
+os.system(f"mv *.out {out_err_folder}")

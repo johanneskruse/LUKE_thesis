@@ -17,10 +17,10 @@ from .model import LukeForEntityTyping
 from .utils import ENTITY_TOKEN, convert_examples_to_features, DatasetProcessor
 
 import numpy as np
+import random
 
 logger = logging.getLogger(__name__)
-
-
+ 
 @click.group(name="entity-typing")
 def cli():
     pass
@@ -56,8 +56,6 @@ def run(common_args, **task_args):
     train_dataloader, _, features, _ = load_and_cache_examples(args, fold="train")
     num_labels = len(features[0].labels)
 
-    # Reduce training size function here: 
-    
     results = {}
 
     dataset_size = {}
@@ -120,7 +118,6 @@ def run(common_args, **task_args):
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
             dataset_size[f"{eval_set}_samples"] = sample_size
 
-
     # Print results: 
     logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
     
@@ -138,6 +135,10 @@ def run(common_args, **task_args):
     results["experimental_configurations"]["log_parameters"]["average_loss"]    = average_loss
     results["experimental_configurations"]["log_parameters"]["output_dir"]      = args.output_dir
     results["experimental_configurations"]["log_parameters"].update(dataset_size)
+    if args.train_frac_size > 1.0: 
+        results["experimental_configurations"]["log_parameters"]["train_constructed"] = "with_replacement"
+    else:
+        results["experimental_configurations"]["log_parameters"]["train_constructed"] = "without_replacement"
     results["training_loss"] = training_loss
 
     # Save and output final json file with all information: 
@@ -287,9 +288,18 @@ def load_and_cache_examples(args, fold="train"):
         dataloader = DataLoader(features, batch_size=args.eval_batch_size, shuffle=False, collate_fn=collate_fn)
     else:
         if args.local_rank == -1:
-            sampler = RandomSampler(features)
+            if args.train_frac_size != 1.0: 
+                random.seed(args.seed)
+                if args.train_frac_size > 1: # Make replacement samples: 
+                    logger.info(f"Training set is constructed with replacement")
+                    features = random.choices(features, k = int(args.train_frac_size*len(features)))
+                else: # Decrease samples for training set without replacement: 
+                    logger.info(f"Training set is constructed without replacement")
+                    features = random.sample(features, int(args.train_frac_size*len(features)))
+            sampler = RandomSampler(features, replacement=False, num_samples=None)
         else:
-            sampler = DistributedSampler(features)
+            sampler = RandomSampler(features, replacement=False, num_samples=None)
+        
         dataloader = DataLoader(features, sampler=sampler, batch_size=args.train_batch_size, collate_fn=collate_fn)
 
     return dataloader, examples, features, label_list
