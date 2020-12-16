@@ -62,15 +62,15 @@ def run(**task_args):
                     training_loss = np.mean(np.array(data["training_loss"]).reshape(-1, gradient_accumulation_steps), axis=1)
 
 
-                dev_precision = [data[z] for z in data if "dev_precision" in z]
-                dev_recall = [data[z] for z in data if "dev_recall" in z]
-                dev_f1 = [data[z] for z in data if "dev_f1" in z]
+                dev_precision = [data[z] for z in data if "dev_precision_epoch" in z]
+                dev_recall = [data[z] for z in data if "dev_recall_epoch" in z]
+                dev_f1 = [data[z] for z in data if "dev_f1_epoch" in z]
 
                 # Make them tensors: 
                 training_loss_tensor = torch.tensor(training_loss)
-                dev_precision_tensor = torch.tensor(dev_precision[:-1])
-                dev_recall_tensor = torch.tensor(dev_recall[:-1])
-                dev_f1_tensor = torch.tensor(dev_f1[:-1])
+                dev_precision_tensor = torch.tensor(dev_precision)
+                dev_recall_tensor = torch.tensor(dev_recall)
+                dev_f1_tensor = torch.tensor(dev_f1)
 
                 # Generate TensorBoards: 
                 tb = SummaryWriter(log_dir = f"{tensorboard_event_folder}/{base_root}")

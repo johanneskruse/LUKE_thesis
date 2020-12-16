@@ -53,7 +53,7 @@ def run(common_args, **task_args):
     args.model_config.entity_vocab_size = 2
     args.model_weights["entity_embeddings.entity_embeddings.weight"] = torch.cat([entity_emb[:1], mask_emb])
 
-    train_dataloader, _, features, _ = load_and_cache_examples(args, fold="train")
+    train_dataloader, _, features, label_list = load_and_cache_examples(args, fold="train")
     num_labels = len(features[0].labels)
 
     results = {}
@@ -75,7 +75,7 @@ def run(common_args, **task_args):
         def step_callback(model, global_step):
             if global_step % num_train_steps_per_epoch == 0 and args.local_rank in (0, -1):
                 epoch = int(global_step / num_train_steps_per_epoch - 1)
-                dev_results, _ = evaluate(args, model, fold="dev")
+                dev_results, _, _ = evaluate(args, model, fold="dev")
                 args.experiment.log_metrics({f"dev_{k}_epoch{epoch}": v for k, v in dev_results.items()}, epoch=epoch)
                 results.update({f"dev_{k}_epoch{epoch}": v for k, v in dev_results.items()})
                 tqdm.write("dev: " + str(dev_results))
@@ -112,11 +112,14 @@ def run(common_args, **task_args):
         model.load_state_dict(torch.load(os.path.join(args.output_dir, WEIGHTS_NAME), map_location="cpu"))
         model.to(args.device)
 
+        evaluation_set_predict = {"label_list": label_list, "dev": {}, "test": {}}
+
         for eval_set in ("dev", "test"):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
-            result_dict, sample_size = evaluate(args, model, eval_set, output_file)
+            result_dict, sample_size, evaluation_set_predict[eval_set] = evaluate(args, model, eval_set, output_file)
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
             dataset_size[f"{eval_set}_samples"] = sample_size
+
 
     # Print results: 
     logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
@@ -139,6 +142,7 @@ def run(common_args, **task_args):
         results["experimental_configurations"]["log_parameters"]["train_constructed"] = "with_replacement"
     else:
         results["experimental_configurations"]["log_parameters"]["train_constructed"] = "without_replacement"
+    results["evaluation_set_predict"] = evaluation_set_predict
     results["training_loss"] = training_loss
 
     # Save and output final json file with all information: 
@@ -202,7 +206,7 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
 
     if output_file:
         with open(output_file, "w") as f:
-            for predicted_indexes, label_indexes, prediction_prob, logits_all in zip(all_predicted_indexes, all_label_indexes, all_predicted_prob, all_logits):
+            for predicted_indexes, label_indexes, prediction_prob in zip(all_predicted_indexes, all_label_indexes, all_predicted_prob):
                 data = dict(
                     predictions=[label_list[ind] for ind in predicted_indexes],
                     labels=[label_list[ind] for ind in label_indexes],
@@ -233,7 +237,11 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
     else:
         f1 = 2 * precision * recall / (precision + recall)
 
-    return dict(precision=precision, recall=recall, f1=f1), len(all_label_indexes)
+    evaluation_set_predict = {"all_predicted_indexes": all_predicted_indexes, 
+                            "all_label_indexes": all_label_indexes, 
+                            "all_predicted_prob": all_predicted_prob}
+
+    return dict(precision=precision, recall=recall, f1=f1), len(all_label_indexes), evaluation_set_predict
 
 
 def load_and_cache_examples(args, fold="train"):
