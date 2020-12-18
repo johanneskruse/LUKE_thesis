@@ -94,4 +94,5 @@ wikipedia2vec==1.0.4
 wrapt==1.12.1
 zipp==3.1.0
 seqeval
-seaborn
+seaborn==0.11.0
+matplotlib==3.3.3

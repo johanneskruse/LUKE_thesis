@@ -10,3 +10,4 @@ luke_experiment/out_err_folder_hpc
 __pycache__
 __pycache__/*
 all_files
+scatter_plots
