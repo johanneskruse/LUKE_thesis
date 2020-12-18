@@ -112,11 +112,11 @@ def run(common_args, **task_args):
         model.load_state_dict(torch.load(os.path.join(args.output_dir, WEIGHTS_NAME), map_location="cpu"))
         model.to(args.device)
 
-        evaluation_set_predict = {"label_list": label_list, "dev": {}, "test": {}}
+        evaluation_predict_label = {"label_list": label_list, "dev": {}, "test": {}}
 
         for eval_set in ("dev", "test"):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
-            result_dict, sample_size, evaluation_set_predict[eval_set] = evaluate(args, model, eval_set, output_file)
+            result_dict, sample_size, evaluation_predict_label[eval_set] = evaluate(args, model, eval_set, output_file)
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
             dataset_size[f"{eval_set}_samples"] = sample_size
 
@@ -142,7 +142,7 @@ def run(common_args, **task_args):
         results["experimental_configurations"]["log_parameters"]["train_constructed"] = "with_replacement"
     else:
         results["experimental_configurations"]["log_parameters"]["train_constructed"] = "without_replacement"
-    results["evaluation_set_predict"] = evaluation_set_predict
+    results["evaluation_predict_label"] = evaluation_predict_label
     results["training_loss"] = training_loss
 
     # Save and output final json file with all information: 
@@ -173,20 +173,19 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
     all_predicted_indexes = []
     all_label_indexes = []
     
-    all_predicted_prob = []
+    # Idea with all_predicted_prob was to collect logits and probability for prediction. Change in plan I will collect all raw data in results file 
+    # all_predicted_prob = []
+    # def logit_to_prob(logits):
+    #     # Should not be a softmax as here.
+    #     for i in logits:
+    #         softmax.append(np.exp(i) / sum(np.exp(logits)))
+    #     return softmax
 
-    def logit_to_prob(logits):
-        # Softmax function 
-        softmax = []
-        for i in logits:
-            softmax.append(np.exp(i) / sum(np.exp(logits)))
-        return softmax
-
+    # Logit select all with > 0 (~ 50% chance) 
     for logits, labels in zip(all_logits, all_labels):
         all_predicted_indexes.append([i for i, v in enumerate(logits) if v > 0])
         all_label_indexes.append([i for i, v in enumerate(labels) if v > 0])
-
-        all_predicted_prob.append([logit_to_prob(logits)])
+        # all_predicted_prob.append([logit_to_prob(logits)])
 
     if write_all:
         if not os.path.exists(args.output_dir + "/all_files"):
@@ -199,21 +198,21 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
             json.dump(all_logits, outfile)
         with open(os.path.join(args.output_dir, "all_files", 'all_labels.txt'), 'w') as outfile:
             json.dump(all_labels, outfile)
-        with open(os.path.join(args.output_dir, "all_files", 'all_predicted_prob.txt'), 'w') as outfile:
-            json.dump(all_predicted_prob, outfile)
         with open(os.path.join(args.output_dir, "all_files", 'label_list.txt'), 'w') as outfile:
             json.dump(label_list, outfile)
+        # with open(os.path.join(args.output_dir, "all_files", 'all_predicted_prob.txt'), 'w') as outfile:
+        #     json.dump(all_predicted_prob, outfile)
 
     if output_file:
         with open(output_file, "w") as f:
-            for predicted_indexes, label_indexes, prediction_prob in zip(all_predicted_indexes, all_label_indexes, all_predicted_prob):
+            for predicted_indexes, label_indexes in zip(all_predicted_indexes, all_label_indexes):
                 data = dict(
                     predictions=[label_list[ind] for ind in predicted_indexes],
-                    labels=[label_list[ind] for ind in label_indexes],
-                    prediction_highest=[label_list[pred_prob.index(max(pred_prob))] for pred_prob in prediction_prob],
-                    prediction_probability=[max(pred_prob) for pred_prob in prediction_prob],
-                    prediction_probability_all=[pred_prob for pred_prob in prediction_prob],
-                    #prediction_logits_all=[logit for logit in logits_all],
+                    labels=[label_list[ind] for ind in label_indexes]
+                    # prediction_highest=[label_list[pred_prob.index(max(pred_prob))] for pred_prob in prediction_prob],
+                    # prediction_probability=[max(pred_prob) for pred_prob in prediction_prob],
+                    # prediction_probability_all=[pred_prob for pred_prob in prediction_prob],
+                    # prediction_logits_all=[logit for logit in logits_all],
                 )
                 f.write(json.dumps(data) + "\n")
 
@@ -237,11 +236,11 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
     else:
         f1 = 2 * precision * recall / (precision + recall)
 
-    evaluation_set_predict = {"all_predicted_indexes": all_predicted_indexes, 
-                            "all_label_indexes": all_label_indexes, 
-                            "all_predicted_prob": all_predicted_prob}
+    # Save raw predicted logits and true labels
+    predictions_and_labels = {"predict_logits": all_logits, 
+                            "true_labels": all_labels}
 
-    return dict(precision=precision, recall=recall, f1=f1), len(all_label_indexes), evaluation_set_predict
+    return dict(precision=precision, recall=recall, f1=f1), len(all_labels), predictions_and_labels
 
 
 def load_and_cache_examples(args, fold="train"):

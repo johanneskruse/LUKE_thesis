@@ -40,29 +40,29 @@ import numpy as np
 # Path parameters: 
 model_file  = "luke_large_500k.tar.gz"
 data_dir    = "data/OpenEntity"
-output_dir  = "data/outputs/OpenEntity"
+output_dir  = "data/outputs/test" # "data/outputs/OpenEntity"
 
 ### Hyperparameters: 
 train_batch_size = 4 # list(range(2,22,2))
 gradient_accumulation_steps = 2 # default 1 
 learning_rate = 1e-5 # [1e-1, 1e-2, 1e-3, ...]
-num_train_epochs = 10
-seed = 12 # list(range(10,21,1))
+num_train_epochs = 5
+seed = [12, 13] # list(range(10,21,1))
 saving_model = "dont-save-model"
 train_frac_size = 1.0 # np.round(np.arange(0.2, 2.2, 0.2),2)
 
 # ========================================================================
 # Naming: 
-experiment_tag = "train_frac_size"
+experiment_tag = "seed"
 
 # Item to loop though:
-loop_items = train_frac_size
+loop_items = seed
 
 # Experiment: 
 for loop_item in loop_items: 
 
     if type(loop_item) is np.float64:
-        loop_item _str = str(loop_item).replace(".", "_")
+        loop_item_str = str(loop_item).replace(".", "_")
         temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{loop_item_str}")
     else:
         temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{loop_item}")
@@ -80,13 +80,13 @@ for loop_item in loop_items:
         f"entity-typing", "run",
         f"--data-dir={data_dir}",
         f"--fp16",
-        f"--seed={seed}",
+        f"--seed={loop_item}", # loop_item -> train_batch_size
         f"--{saving_model}",
         f"--num-train-epochs={num_train_epochs}", 
         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}", # loop_item -> train_batch_size
+        f"--train-batch-size={train_batch_size}", 
         f"--learning-rate={learning_rate}",
-        f"--train-frac-size={loop_item}" # loop_item -> train_batch_size
+        f"--train-frac-size={train_frac_size}" 
     ))
 
 
