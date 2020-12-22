@@ -45,27 +45,27 @@ output_dir  = "data/outputs/test" # "data/outputs/OpenEntity"
 ### Hyperparameters: 
 train_batch_size = 4 # list(range(2,22,2))
 gradient_accumulation_steps = 2 # default 1 
-learning_rate = 1e-5 # [1e-1, 1e-2, 1e-3, ...]
-num_train_epochs = 5
-seed = [12, 13] # list(range(10,21,1))
+learning_rate = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10] # [1e-1, 1e-2, 1e-3, ...]
+num_train_epochs = 10
+seed = 12 # list(range(10,21,1))
 saving_model = "dont-save-model"
-train_frac_size = 1.0 # np.round(np.arange(0.2, 2.2, 0.2),2)
+train_frac_size = 1.0 # 1.0 # np.round(np.arange(0.2, 2.2, 0.2),2)
 
 # ========================================================================
 # Naming: 
-experiment_tag = "seed"
+experiment_tag = "learning_rate"
 
 # Item to loop though:
-loop_items = seed
+loop_items = learning_rate
 
 # Experiment: 
 for loop_item in loop_items: 
 
     if type(loop_item) is np.float64:
         loop_item_str = str(loop_item).replace(".", "_")
-        temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{loop_item_str}")
+        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
     else:
-        temp_output_dir = os.path.join(output_dir, f"robustness_{experiment_tag}_{loop_item}")
+        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
     
     if os.path.exists(temp_output_dir): 
         continue 
@@ -80,12 +80,12 @@ for loop_item in loop_items:
         f"entity-typing", "run",
         f"--data-dir={data_dir}",
         f"--fp16",
-        f"--seed={loop_item}", # loop_item -> train_batch_size
+        f"--seed={seed}", 
         f"--{saving_model}",
         f"--num-train-epochs={num_train_epochs}", 
         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
         f"--train-batch-size={train_batch_size}", 
-        f"--learning-rate={learning_rate}",
+        f"--learning-rate={loop_item}", # loop_item 
         f"--train-frac-size={train_frac_size}" 
     ))
 
@@ -98,3 +98,4 @@ if not os.path.exists(f"{out_err_folder}"):
 
 os.system(f"mv *.err {out_err_folder}")
 os.system(f"mv *.out {out_err_folder}")
+

@@ -237,10 +237,10 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
         f1 = 2 * precision * recall / (precision + recall)
 
     # Save raw predicted logits and true labels
-    predictions_and_labels = {"predict_logits": all_logits, 
+    evaluation_predict_label = {"predict_logits": all_logits, 
                             "true_labels": all_labels}
 
-    return dict(precision=precision, recall=recall, f1=f1), len(all_labels), predictions_and_labels
+    return dict(precision=precision, recall=recall, f1=f1), len(all_labels), evaluation_predict_label
 
 
 def load_and_cache_examples(args, fold="train"):

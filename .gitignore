@@ -1,13 +1,22 @@
+# System:
+__pycache__
+__pycache__/*
+
+# Data: 
 data
 luke_large_500k.tar.gz
 apex
+
+
+# # Output Files
+luke_experiment/out_err_folder_hpc
+all_files
 output/*/
 output*
 *.out 
 *.err
-runs_tensorboards
-luke_experiment/out_err_folder_hpc
-__pycache__
-__pycache__/*
-all_files
+
+# Plots:
 scatter_plots
+calibration_plots
+runs_tensorboards

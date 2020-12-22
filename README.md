@@ -136,13 +136,13 @@ python -m examples.cli --num-gpus=8 --model-file=luke_large_500k.tar.gz --output
 
 To generate the event files for Tensorboard run: 
 ```bash
-python -m luke_tensorboard.tensorboards_event_files --data-dir data/outputs/OpenEntity --tensorboard-event-folder luke_tensorboard/runs_tensorboards
+python -m luke_meta_analysis.meta_analysis --data-dir data/outputs/OpenEntity --tensorboard-event-folder luke_tensorboard/runs_tensorboards
 ```
 
 **Run the Tensorboard:**
 
 ```bash
-tensorboard --logdir luke_tensorboard/runs_tensorboards
+tensorboard --logdir luke_meta_analysis/runs_tensorboards
 ```
 
 ## Citation

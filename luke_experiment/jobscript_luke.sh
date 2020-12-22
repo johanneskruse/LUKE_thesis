@@ -33,4 +33,9 @@
 source ~/.bashrc
 conda activate luke
 
-python luke_experiment/experiment_setup_file.py 
+# python luke_experiment/experiment_setup_file.py 
+
+# Paper reconstruction:
+#python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/OpenEntity entity-typing run --data-dir=data/OpenEntity --fp16 --dont-save-model --gradient-accumulation-steps=2 --learning-rate=1e-5 --train-batch-size=4 --num-train-epochs=3
+python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/tacred relation-classification run --data-dir=data/TACRED --fp16 --train-batch-size=32 --gradient-accumulation-steps=8 --learning-rate=1e-5 --num-train-epochs=5
+python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/conll2003 ner run --data-dir=data/CoNLL2003 --fp16 --train-batch-size=8 --gradient-accumulation-steps=2 --learning-rate=1e-5 --num-train-epochs=5 
