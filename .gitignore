@@ -1,6 +1,7 @@
 # System:
 __pycache__
 __pycache__/*
+.DS_Store
 
 # Data: 
 data
@@ -20,3 +21,7 @@ output*
 scatter_plots
 calibration_plots
 runs_tensorboards
+
+
+# Confusion matrix:
+confusion_matrix/
