@@ -1,9 +1,5 @@
 import json
-
-
-import json
 import os
-
 
 class CoNLLProcessor(object):
     def get_train_examples(self, data_dir):
@@ -62,7 +58,7 @@ class InputExample(object):
 
 
 # TACRED: 
-with open("/Users/johanneskruse/Desktop/test_scripts/samples/tacred/dev.json") as j:
+with open("data/tacred/dev.json") as j:
     data = json.load(j)
 
 print(f"keys: {data[0].keys()}")
@@ -86,7 +82,7 @@ for z in range(10):
 
 # CoNLL-2003
 processor = CoNLLProcessor()
-train_conll = processor._read_data("/Users/johanneskruse/Desktop/test_scripts/samples/conll/eng.train")
+train_conll = processor._read_data("data/CoNLL2003/eng.train")
 
 for z in range(10):
     print(z)

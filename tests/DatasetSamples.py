@@ -1,6 +1,7 @@
 import json
 import os
 
+data_dir = "data"
 
 class CoNLLProcessor(object):
     def get_train_examples(self, data_dir):
@@ -62,15 +63,15 @@ class InputExample(object):
 
 processor = CoNLLProcessor()
 
-data_dir = "/Users/johanneskruse/Desktop/test_scripts/samples/conll/eng.train"
-
-train_conll = processor._read_data(data_dir)
+train_conll = processor._read_data(os.path.join(data_dir, "CoNLL2003/eng.train"))
+val_conll = processor._read_data(os.path.join(data_dir, "CoNLL2003/eng.testa"))
+test_conll = processor._read_data(os.path.join(data_dir, "CoNLL2003/eng.testb"))
 
 train_samples = sum([len(train_conll[i][2]) for i in range(len(train_conll))])
 val_samples = sum([len(val_conll[i][2]) for i in range(len(val_conll))])
 test_samples = sum([len(test_conll[i][2]) for i in range(len(test_conll))])
 
-print(f"\n\nCoNLL-2003 dataset \nTraining: {train_samples}")
+print(f"\n\nCoNLL-2003 dataset \nTraining: {train_samples} \nValidation: {val_samples} \nTest: {test_samples}")
 
 print("\n\n")
 
@@ -86,17 +87,6 @@ print("\n\n")
 # 1)    train_conll[i][0]: Sentence tokenized (seperated by space) 
 # 4)    train_conll[i][1]: The named entity tag
 #       train_conll[i][2] = Index for train/test samples
-
-# See an example: 
-see = True
-if see:
-    for z in range(10):
-        print(z)
-        for i in train_conll[z][2][0:-1]: 
-            print(train_conll[z][0][i], train_conll[z][1][i])
-        print("")
-        
-
 
 
 # ================================= CoNLL-2003 ================================== 
@@ -116,36 +106,15 @@ datasets = ["train.json", "dev.json", "test.json"]
 print("Open Entity")
 for dataset in datasets:
         
-    data_dir = os.path.join(os.getcwd(), "samples", "openentity", dataset)
+    data_dir_temp = os.path.join(data_dir, "OpenEntity", dataset)
     
-    if not os.path.exists(data_dir):
+    if not os.path.exists(data_dir_temp):
         continue
 
-    with open(data_dir) as json_file:
+    with open(data_dir_temp) as json_file:
         data_OE = json.load(json_file)
 
     print(f"{dataset}: {len(data_OE)}" )
-
-    count_place = 0
-    count_location = 0  
-    count_place_location = 0
-
-    for sample in data_OE: 
-        if "location" in sample["labels"] and not "place" in sample["labels"]:
-            count_location +=1 
-        if "location" not in sample["labels"] and "place" in sample["labels"]:
-            count_place +=1
-        if "location" in sample["labels"] and "place" in sample["labels"]:
-            count_place_location +=1
-    if see:
-        print("")
-        print(f"Location: {count_location}")
-        print(f"Place: {count_location}")
-        print(f"Location and Place: {count_place_location}")
-        print("")
-
-if see:
-    print(data_OE[1])
 
 print("\n\n")
 
@@ -160,13 +129,13 @@ print("\n\n")
 
 print("ReCoRD")
 for dataset in datasets:
-
-    data_dir = os.path.join(os.getcwd(), "ReCoRD", dataset)
     
-    if not os.path.exists(data_dir):
+    data_dir_temp = os.path.join(data_dir, "ReCoRD", dataset)
+    
+    if not os.path.exists(data_dir_temp):
         continue
 
-    with open(data_dir) as json_file:
+    with open(data_dir_temp) as json_file:
         data = json.load(json_file)
 
     i = 0
@@ -187,19 +156,22 @@ print("\n\n")
 # dev.json:     10570
 
 print("SQuAD")
-data_dir = "/Users/johanneskruse/Desktop/test_scripts/samples/squad/dev.json"
+for dataset in datasets:
+
+    data_dir_temp = os.path.join(data_dir, "SQuAD", dataset)
     
-with open(data_dir) as json_file:
-    data = json.load(json_file)
+    if not os.path.exists(data_dir_temp):
+        continue
 
-dataset = "dev"
+    with open(data_dir_temp) as json_file:
+        data = json.load(json_file)
 
-i = 0
-for article in data["data"]:
-    for paragraph in article["paragraphs"]:
-        i += len(paragraph["qas"])
+    i = 0
+    for article in data["data"]:
+        for paragraph in article["paragraphs"]:
+            i += len(paragraph["qas"])
 
-print(f"{dataset}: {i}" )
+    print(f"{dataset}: {i}" )
 
 print("\n\n")
 
@@ -217,12 +189,12 @@ print("\n\n")
 print("TACRED")
 for dataset in datasets:
 
-    data_dir = os.path.join(os.getcwd(), "TACRED", dataset)
+    data_dir_temp = os.path.join(data_dir, "TACRED", dataset)
     
-    if not os.path.exists(data_dir):
+    if not os.path.exists(data_dir_temp):
         continue
 
-    with open(data_dir) as json_file:
+    with open(data_dir_temp) as json_file:
         data = json.load(json_file)
 
     print(f"{dataset}: {len(data)}")

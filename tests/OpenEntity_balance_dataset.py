@@ -1,10 +1,10 @@
 import json
 
-with open("/Users/johanneskruse/Desktop/test_scripts/input/train.json") as g:
+with open("data/OpenEntity/train.json") as g:
     train = json.load(g)
-with open("/Users/johanneskruse/Desktop/test_scripts/input/dev.json") as g:
+with open("data/OpenEntity/dev.json") as g:
     dev = json.load(g)
-with open("/Users/johanneskruse/Desktop/test_scripts/input/test.json") as g:
+with open("data/OpenEntity/test.json") as g:
     test = json.load(g)
 
 
@@ -31,7 +31,7 @@ for dataset in datasets:
         f"Rejects {dataset}: {reject}\n"
         f"Sum: {multiple_labels+single_label+reject}")
 
-
+print("")
 # ================================
 # Categories: 
 

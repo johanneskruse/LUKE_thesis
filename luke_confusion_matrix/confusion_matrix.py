@@ -192,25 +192,7 @@ if cm_save:
     single_label.savefig(f"{cm_output_dir}/confusion_matrix/single_label_only.png", dpi=dpi)
 
 
-# Sanity check: 
-single = 0
-multi = 0
-reject = 0
-for i in y_true:
-    i = i[:-1]
-    if sum(i) == 0:
-        reject += 1
-    if sum(i) == 1:
-        single += 1
-    if sum(i) > 1:
-        multi += 1
-
-print(f"{eval_set}\n"
-    f"Samples with 1 entity for {eval_set}: {single}\n"
-    f"Samples with > 1 entities for {eval_set}: {multi}\n"
-    f"Rejects {eval_set}: {reject}\n"
-    f"Sum: {single+multi+reject}")
-
+print("Done!")
 
 # ================================================================================================
 # ================================================================================================
