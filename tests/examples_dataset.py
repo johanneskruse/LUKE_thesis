@@ -58,16 +58,16 @@ class InputExample(object):
 
 
 # TACRED: 
-with open("data/tacred/dev.json") as j:
+with open("data/TACRED/dev.json") as j:
     data = json.load(j)
 
 print("=======================")
 
-print("TACRED dataset")
+print("\n\nTACRED dataset\n\n")
 
 print(f"keys in data:\n{data[0].keys()}")
 
-for z in range(10):
+for z in range(3):
     print(z)
     print(f'relation: {data[z]["relation"]}')
     print(f'relation: {data[z]["relation"]}')
@@ -92,7 +92,7 @@ print("\n\nCoNLL-2003 dataset\n\n")
 processor = CoNLLProcessor()
 train_conll = processor._read_data("data/CoNLL2003/eng.train")
 
-for z in range(10):
+for z in range(3):
     print(z)
     for i in train_conll[z][2][0:-1]: 
         print(train_conll[z][0][i], train_conll[z][1][i])
@@ -109,7 +109,7 @@ print("\n\nOpen Entity dataset\n\n")
 
 print("Dev:")
 
-for i in range(10):
+for i in range(3):
     print(i)
     print(f'{data_OE[i]["sent"]}') 
     print(f'Entity: {data_OE[i]["sent"][data_OE[i]["start"]:data_OE[i]["end"]]}')
@@ -129,6 +129,7 @@ print(f'Context: \n{data["data"][0]["paragraphs"][2]["context"]}')
 print(f'Q&A pair: \n{data["data"][0]["paragraphs"][2]["qas"][1]}')
 print(f'Q&A pair: \n{data["data"][0]["paragraphs"][2]["qas"][9]}')
 
+print("")
 print("=======================")
 
 # ReCoRD: 
@@ -143,8 +144,7 @@ print("")
 for entity in example["entities"]:
     print(f'Entity: {example["text"][entity["start"]: entity["end"]+1]}')
 
-
-
+print("")
 
 
 
