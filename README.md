@@ -136,14 +136,27 @@ python -m examples.cli --num-gpus=8 --model-file=luke_large_500k.tar.gz --output
 
 To generate the event files for Tensorboard run: 
 ```bash
-python -m luke_meta_analysis.meta_analysis --data-dir data/outputs/OpenEntity --tensorboard-event-folder luke_tensorboard/runs_tensorboards
+python -m luke_meta_analysis.meta_analysis --data-dir data/outputs/experiment_output 
 ```
 
+Here data-dir is the path to the experiments that contain all folders with experiments. Thus, in an experiment multiple experiment folder exists, where each of them contain a result.json file ([robust_seed_1, robust_seed_2, robust_seed_3, etc.)
+
+The output-dir is default: 'luke_meta_analysis' (the same as the scripts). Note you can disable a meta-analysis plot (true/false): 
+- "--tensorboard-plot/--no-tensorboard-plot" 
+- "--scatter-plot/--no-scatter-plot"
+- "--calibration-plot/--no-calibration-plot"
+
+The default is true.
+
 **Run the Tensorboard:**
+
+Run tensorboard: 
 
 ```bash
 tensorboard --logdir luke_meta_analysis/runs_tensorboards
 ```
+
+This is the default path.
 
 ## Citation
 
