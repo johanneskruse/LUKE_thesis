@@ -61,7 +61,11 @@ class InputExample(object):
 with open("data/tacred/dev.json") as j:
     data = json.load(j)
 
-print(f"keys: {data[0].keys()}")
+print("=======================")
+
+print("TACRED dataset")
+
+print(f"keys in data:\n{data[0].keys()}")
 
 for z in range(10):
     print(z)
@@ -79,6 +83,10 @@ for z in range(10):
     print(p)
     print("")
 
+print("=======================")
+
+print("\n\nCoNLL-2003 dataset\n\n")
+
 
 # CoNLL-2003
 processor = CoNLLProcessor()
@@ -90,22 +98,52 @@ for z in range(10):
         print(train_conll[z][0][i], train_conll[z][1][i])
     print("")
 
-
+print("=======================")
 
 # Open Entity: 
-
-
-with open("/Users/johanneskruse/Desktop/test_scripts/samples/openentity/test.json") as json_file:
+with open("data/OpenEntity/test.json") as json_file:
     data_OE = json.load(json_file)
+
+
+print("\n\nOpen Entity dataset\n\n")
 
 print("Dev:")
 
-for i in range(1000):
+for i in range(10):
     print(i)
     print(f'{data_OE[i]["sent"]}') 
     print(f'Entity: {data_OE[i]["sent"][data_OE[i]["start"]:data_OE[i]["end"]]}')
     print(f'{data_OE[i]["labels"]}') 
     print("")
+
+
+print("=======================")
+
+# SQuAD: 
+with open("data/SQuAD/dev.json") as json_file:
+    data = json.load(json_file)
+
+print("\n\nSQuAD dataset\n\n")
+
+print(f'Context: \n{data["data"][0]["paragraphs"][2]["context"]}')
+print(f'Q&A pair: \n{data["data"][0]["paragraphs"][2]["qas"][1]}')
+print(f'Q&A pair: \n{data["data"][0]["paragraphs"][2]["qas"][9]}')
+
+print("=======================")
+
+# ReCoRD: 
+with open("data/ReCoRD/dev.json") as json_file:
+    data = json.load(json_file)
+
+print("\n\nReCoRD dataset\n\n")
+
+example = data["data"][3]["passage"]
+print(f'Context: \n{example["text"]}')
+print("")
+for entity in example["entities"]:
+    print(f'Entity: {example["text"][entity["start"]: entity["end"]+1]}')
+
+
 
 
 
