@@ -7,8 +7,9 @@ import numpy as np
 from argparse import Namespace
 import click
 
-
 from functions import *
+
+import matplotlib.pyplot as plt
 
 # ==============================================================================
 # Meta analysis for experiments 
@@ -17,6 +18,14 @@ from functions import *
 class config():
     tags = ["learning_rate", "seed", "train_batch_size", "train_frac_size"]
     eval_sets = ["dev", "test"]
+
+# data_dir = "../data/outputs/seed_lr_batch_frac"
+# output_dir = "."
+# tensorboard_plot = True
+# scatter_plot = True
+# calibration_plot = True
+
+dpi = 300    
 
 # ==============================================================================
 
@@ -44,9 +53,11 @@ def run(**task_args):
     experiment_tags = config.tags
 
     eval_results = {}
+    eval_results_with_tag = {}
     pred_logts = {}
 
     for experiment_tag in experiment_tags:
+        eval_results[experiment_tag] = {}
 
         f1_eval = torch.tensor([])
         precision_eval = torch.tensor([])
@@ -104,10 +115,11 @@ def run(**task_args):
 
 
                 # Data for Scatter Plot: 
-                f1_eval         = np.append(f1_eval, [dev_f1_eval, test_f1_eval])
-                precision_eval  = np.append(precision_eval, [dev_precision_eval, test_precision_eval])
-                recall_eval     = np.append(recall_eval, [dev_recall_eval, test_recall_eval])
+                eval_results[experiment_tag][base_root] = {}
 
+                eval_results[experiment_tag][base_root]["f1"] = [dev_f1_eval, test_f1_eval]
+                eval_results[experiment_tag][base_root]["precision"] = [dev_precision_eval, test_precision_eval]
+                eval_results[experiment_tag][base_root]["recall"] = [dev_recall_eval, test_recall_eval]
 
                 # For Calibration plots:   
                 pred_logts[experiment_tag][base_root] = {}
@@ -145,24 +157,35 @@ def run(**task_args):
         ######################################################
         
         # Scatter plot for dev and test:
-        if len(f1_eval) != 0 and scatter_plot: 
-            eval_results[experiment_tag] = {"f1" : f1_eval.reshape(-1,2), 
-                                            "recall": precision_eval.reshape(-1,2),
-                                            "precision" : recall_eval.reshape(-1,2)}
+        if eval_results[experiment_tag] and scatter_plot: 
+            f1_eval, recall_eval, precision_eval = [], [], []
 
-            scatter_plt = plot_scatter(eval_results[experiment_tag], experiment_tag)
+            for experiment in sorted(eval_results[experiment_tag]):
+                f1_eval.append(eval_results[experiment_tag][experiment]["f1"])
+                precision_eval.append(eval_results[experiment_tag][experiment]["precision"])
+                recall_eval.append(eval_results[experiment_tag][experiment]["recall"])
 
-            if not os.path.exists("luke_meta_analysis/scatter_plots"):
-                os.makedirs("luke_meta_analysis/scatter_plots")
+            eval_results_with_tag[experiment_tag] = {"f1" : np.array(flatten(f1_eval)).reshape(-1,2),
+                                                    "precision" : np.array(flatten(precision_eval)).reshape(-1,2),
+                                                    "recall" : np.array(flatten(recall_eval)).reshape(-1,2)}
+            labels = sorted(eval_results[experiment_tag])
+
+            if "robust_" in labels[0]:
+                labels = [label[7:] for label in labels]
+
+            scatter_plt = plot_scatter(eval_results_with_tag[experiment_tag], labels, title=experiment_tag)
+
+            if not os.path.exists(f"{output_dir}/scatter_plots"):
+                os.makedirs(f"{output_dir}/scatter_plots")
                 
-            scatter_plt.savefig(f"luke_meta_analysis/scatter_plots/dev_test_{experiment_tag}")
+            scatter_plt.savefig(f"{output_dir}/scatter_plots/dev_test_{experiment_tag}", dpi=dpi)
         
 
         # Calibration Plot for dev and test seperately: 
         if pred_logts[experiment_tag] and calibration_plot: 
             
-            if not os.path.exists("luke_meta_analysis/calibration_plots"):
-                os.makedirs("luke_meta_analysis/calibration_plots")
+            if not os.path.exists(f"{output_dir}/calibration_plots"):
+                os.makedirs(f"{output_dir}/calibration_plots")
 
             for eval_set in config.eval_sets:
         
@@ -173,7 +196,7 @@ def run(**task_args):
                 true_temp = np.array([])
                 pred_temp = np.array([])
                 
-                for experiment in pred_logts[experiment_tag]:
+                for experiment in sorted(pred_logts[experiment_tag]):
                     labels.append(experiment)
 
                     true_temp = np.concatenate(pred_logts[experiment_tag][experiment][eval_set]["true_labels"])
@@ -183,14 +206,21 @@ def run(**task_args):
                     true.append(true_temp)
                     pred.append(pred_temp)
 
-                cal_plot = plot_calibration_curve(true, pred, model_name=labels, title=f"{eval_set}", n_bins=10)
+                if eval_set == "test":
+                    title = "Test set"
+                if eval_set == "dev":
+                    title = "Development set"
 
-                cal_plot.savefig(f"luke_meta_analysis/calibration_plots/{experiment_tag}_{eval_set}")
+                if "robust_" in labels[0]:
+                    labels = [label[7:] for label in labels]
+                cal_plot = plot_calibration_curve(true, pred, model_name=labels, title=title, n_bins=10)
+                #plt.tight_layout()
+
+                cal_plot.savefig(f"luke_meta_analysis/calibration_plots/{experiment_tag}_{eval_set}", dpi=dpi)
                 
 ####### COPY END #######
 
 # ==============================================================================
-
 
 if __name__ == '__main__':
     run()
