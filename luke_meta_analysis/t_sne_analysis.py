@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 #from luke_confusion_matrix.confusion_matrix import * 
 
 from sklearn.manifold import TSNE
-
 import argparse
 
 
@@ -75,7 +74,7 @@ def tsne_3d(x, y, z, title, labels):
 
 # Define path to data source: 
 
-# parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 
 parser.add_argument("--data-dir", default="data/outputs/seed_experiment_500")
 parser.add_argument("--output-dir", default="luke_meta_analysis")
@@ -95,8 +94,7 @@ tsne_save = args.tsne_save
 # tsne_save = True
 #
 
-def run()
-
+def run():
     t_sne_dir = os.path.join(output_dir, "t_sne_plots")
 
     logits = []
@@ -117,8 +115,6 @@ def run()
 
 
             logits.append(flatten(evaluations["dev"]["predict_logits"]))
-
-
 
 
     matrix = np.array(flatten(logits)).reshape(-1, len(logits))
