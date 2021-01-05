@@ -6,13 +6,8 @@ import seaborn as sns
 
 import matplotlib.pyplot as plt
 
-
-#from luke_confusion_matrix.confusion_matrix import * 
-
 from sklearn.manifold import TSNE
 import argparse
-
-
 
 # ================================================================================================
 
@@ -85,20 +80,13 @@ parser.set_defaults(tsne_save=True)
 args = parser.parse_args()
 
 data_dir = args.data_dir
-tsne_output_dir = args.tsne_output_dir
+output_dir = args.output_dir
 tsne_save = args.tsne_save
- 
-#
-# data_dir = "../data/outputs/seed_experiment_500"
-# output_dir = "."
-# tsne_save = True
-#
 
 def run():
     t_sne_dir = os.path.join(output_dir, "t_sne_plots")
 
     logits = []
-
     for root, dirs, files in os.walk(data_dir):
         
         for dir_ in dirs: 
@@ -112,7 +100,6 @@ def run():
             evaluations = data["evaluation_predict_label"]
             dev_test = {"dev": {}, "test": {}}
             eval_sets = ['dev', 'test']
-
 
             logits.append(flatten(evaluations["dev"]["predict_logits"]))
 
