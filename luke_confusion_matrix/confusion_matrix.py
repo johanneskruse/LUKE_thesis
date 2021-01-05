@@ -3,8 +3,7 @@ import json
 import numpy as np
 import os
 
-import seaborn as sn
-import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 plt.rcParams.update({'font.size': 24})
@@ -16,7 +15,6 @@ from sklearn.calibration import calibration_curve
 import argparse
 
 # ================================================================================================
-
 
 def add_reject_entry(one_hot_dataset):
     # Add reject as class: 
@@ -70,8 +68,8 @@ def plot_cm(cm, class_names, normalize=False, cbar=True, font_scale=1.5, title=F
     else: 
         figure = plt.figure(figsize=(7,7))
     #plt.title("Confusion matrix")
-    sn.set(font_scale=font_scale) # label size
-    sn.heatmap(cm, cmap="Blues", annot=True, fmt='g', linewidth=0.5, cbar=cbar) # font size
+    sns.set(font_scale=font_scale) # label size
+    sns.heatmap(cm, cmap="Blues", annot=True, fmt='g', linewidth=0.5, cbar=cbar) # font size
     
     if title: 
         plt.title(f"'{class_names[1]}' vs rest")
@@ -106,93 +104,97 @@ cm_save = args.cm_save
  
 # data_dir = "../data/outputs/paper_reconstruction/OpenEntity/results.json"
 
-
 # ================================================
+def run():
+    with open(data_dir) as json_file:
+        data = json.load(json_file)
 
-with open(data_dir) as json_file:
-    data = json.load(json_file)
+    evaluations = data["evaluation_predict_label"]
+    confusion_matrices = {"dev": {}, "test": {}}
+    eval_sets = ['dev', 'test']
+    labels = evaluations["label_list"]
+    labels.append("reject")
 
-evaluations = data["evaluation_predict_label"] # new naming: evaluation_predict_label
-confusion_matrices = {"dev": {}, "test": {}}
-eval_sets = ['dev', 'test']
-labels = evaluations["label_list"]
-labels.append("reject")
+    for eval_set in eval_sets: 
 
-for eval_set in eval_sets: 
+        y_true = one_hot_encoding(evaluations[eval_set]["true_labels"])
+        y_pred = one_hot_encoding(evaluations[eval_set]["predict_logits"])
 
-    y_true = one_hot_encoding(evaluations[eval_set]["true_labels"])
-    y_pred = one_hot_encoding(evaluations[eval_set]["predict_logits"])
+        ##############################
+        ######## Multi-label #########
+        confusion_matrices[eval_set]["multi_label_all"] = multilabel_confusion_matrix(y_true, y_pred)
 
-    ##############################
-    ######## Multi-label #########
-    confusion_matrices[eval_set]["multi_label_all"] = multilabel_confusion_matrix(y_true, y_pred)
+        ##############################
+        #### Removing multi-label ####
+        y_true_single = np.array([])
+        y_pred_single = np.array([])
+        
+        y_true_multi = np.array([])
+        y_pred_multi = np.array([])
 
-    ##############################
-    #### Removing multi-label ####
-    y_true_single = np.array([])
-    y_pred_single = np.array([])
-    
-    y_true_multi = np.array([])
-    y_pred_multi = np.array([])
+        num_entities = len(y_true[0])
 
-    num_entities = len(y_true[0])
+        for i in range(len(y_pred)):
+            if sum(y_true[i,:]) <= 1 and sum(y_pred[i,:]) <=1: 
+                y_true_single = np.append(y_true_single, y_true[i,:])
+                y_pred_single = np.append(y_pred_single, y_pred[i,:])
+            else: 
+                y_true_multi = np.append(y_true_multi, y_true[i,:])
+                y_pred_multi = np.append(y_pred_multi, y_pred[i,:])
 
-    for i in range(len(y_pred)):
-        if sum(y_true[i,:]) <= 1 and sum(y_pred[i,:]) <=1: 
-            y_true_single = np.append(y_true_single, y_true[i,:])
-            y_pred_single = np.append(y_pred_single, y_pred[i,:])
+        # Reshape: 
+        y_true_single = np.reshape(y_true_single, (-1,num_entities))
+        y_pred_single = np.reshape(y_pred_single, (-1,num_entities))
+
+        y_true_multi = np.reshape(y_true_multi, (-1,num_entities))
+        y_pred_multi = np.reshape(y_pred_multi, (-1,num_entities))
+
+        # The category index: 
+        true_entity_single = y_true_single.argmax(axis=1)
+        pred_entity_single = y_pred_single.argmax(axis=1)
+
+        # Confusion matrix only for single labelled: 
+        confusion_matrices[eval_set]["single_label_only"] = {"entity_index" : list(set(np.append(true_entity_single, pred_entity_single))),
+                                                            "confusion_matrix" : confusion_matrix(true_entity_single, pred_entity_single)}
+
+        # Confusion matrix only for multi-labelled: 
+        confusion_matrices[eval_set]["multi_label_only"] = multilabel_confusion_matrix(y_true_multi, y_pred_multi)
+
+    # ================================================================================================
+
+    if cm_save: 
+        if not os.path.exists("confusion_matrix/multi_label_all"):
+            os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_all")
+        if not os.path.exists(f"{cm_output_dir}/confusion_matrix/multi_label_only"):
+            os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_only")
         else: 
-            y_true_multi = np.append(y_true_multi, y_true[i,:])
-            y_pred_multi = np.append(y_pred_multi, y_pred[i,:])
+            pass
 
-    # Reshape: 
-    y_true_single = np.reshape(y_true_single, (-1,num_entities))
-    y_pred_single = np.reshape(y_pred_single, (-1,num_entities))
+    dpi = 300
 
-    y_true_multi = np.reshape(y_true_multi, (-1,num_entities))
-    y_pred_multi = np.reshape(y_pred_multi, (-1,num_entities))
-
-    # The category index: 
-    true_entity_single = y_true_single.argmax(axis=1)
-    pred_entity_single = y_pred_single.argmax(axis=1)
-
-    # Confusion matrix only for single labelled: 
-    confusion_matrices[eval_set]["single_label_only"] = {"entity_index" : list(set(np.append(true_entity_single, pred_entity_single))),
-                                                        "confusion_matrix" : confusion_matrix(true_entity_single, pred_entity_single)}
-
-    # Confusion matrix only for multi-labelled: 
-    confusion_matrices[eval_set]["multi_label_only"] = multilabel_confusion_matrix(y_true_multi, y_pred_multi)
-
-# ================================================================================================
-
-if cm_save: 
-    if not os.path.exists("confusion_matrix/multi_label_all"):
-        os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_all")
-    if not os.path.exists(f"{cm_output_dir}/confusion_matrix/multi_label_only"):
-        os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_only")
-
-dpi = 300
-
-# Example: 
-for i, cm in enumerate(confusion_matrices["dev"]["multi_label_all"]):
-    multi_label_all = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
-    if cm_save: 
-        multi_label_all.savefig(f"{cm_output_dir}/confusion_matrix/multi_label_all/multi_all_{labels[i]}.png", dpi=dpi)
- 
-for i, cm in enumerate(confusion_matrices["dev"]["multi_label_only"]):
-    multi_label_only = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
-    if cm_save: 
-        multi_label_only.savefig(f"{cm_output_dir}/confusion_matrix/multi_label_only/multi_{labels[i]}.png", dpi=dpi)
+    # Example: 
+    for i, cm in enumerate(confusion_matrices["dev"]["multi_label_all"]):
+        multi_label_all = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
+        if cm_save: 
+            multi_label_all.savefig(f"{cm_output_dir}/confusion_matrix/multi_label_all/multi_all_{labels[i]}.png", dpi=dpi)
+    
+    for i, cm in enumerate(confusion_matrices["dev"]["multi_label_only"]):
+        multi_label_only = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
+        if cm_save: 
+            multi_label_only.savefig(f"{cm_output_dir}/confusion_matrix/multi_label_only/multi_{labels[i]}.png", dpi=dpi)
 
 
-# Single label: 
-single_label = plot_cm(cm = confusion_matrices["dev"]["single_label_only"]["confusion_matrix"], 
-                        class_names = labels[1:], normalize=True, cbar=True)
-if cm_save:
-    single_label.savefig(f"{cm_output_dir}/confusion_matrix/single_label_only.png", dpi=dpi)
+    # Single label: 
+    single_label = plot_cm(cm = confusion_matrices["dev"]["single_label_only"]["confusion_matrix"], 
+                            class_names = labels[1:], normalize=True, cbar=True)
+    if cm_save:
+        single_label.savefig(f"{cm_output_dir}/confusion_matrix/single_label_only.png", dpi=dpi)
 
-
-print("Done!")
+    print("Done!")
 
 # ================================================================================================
 # ================================================================================================
+
+
+if __name__ == "__main__":
+    run()

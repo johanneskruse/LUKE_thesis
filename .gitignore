@@ -21,7 +21,7 @@ output*
 scatter_plots
 calibration_plots
 runs_tensorboards
-
+t_sne_plots
 
 # Confusion matrix:
 confusion_matrix/

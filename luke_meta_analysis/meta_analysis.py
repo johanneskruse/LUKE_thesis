@@ -67,7 +67,7 @@ def run(**task_args):
         
         for root, dirs, files in os.walk(data_dir):
 
-            result_json = root + "/results.json"
+            result_json = os.path.join(root, "results.json")
             base_root = os.path.basename(root)
             
             if os.path.exists(result_json) and experiment_tag in base_root:
