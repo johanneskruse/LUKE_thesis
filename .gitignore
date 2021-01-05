@@ -2,6 +2,9 @@
 __pycache__
 __pycache__/*
 .DS_Store
+*.pyc
+*.swp
+main.cpython-36.pyc
 
 # Data: 
 data
