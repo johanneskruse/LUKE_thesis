@@ -90,11 +90,11 @@ output_dir = args.output_dir
 tsne_save = args.tsne_save
 
 
-# #
-# # data_dir = "../data/outputs/seed_experiment_500"
-# # output_dir = "."
-# # tsne_save = True
-# #
+#
+# data_dir = "../data/outputs/seed_experiment_500"
+# output_dir = "."
+# tsne_save = True
+#
 
 def run():
     t_sne_dir = os.path.join(output_dir, "t_sne_plots")
