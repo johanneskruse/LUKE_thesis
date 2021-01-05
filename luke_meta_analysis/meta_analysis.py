@@ -19,11 +19,11 @@ class config():
     tags = ["learning_rate", "seed", "train_batch_size", "train_frac_size"]
     eval_sets = ["dev", "test"]
 
-# data_dir = "../data/outputs/seed_lr_batch_frac"
-# output_dir = "."
-# tensorboard_plot = True
-# scatter_plot = True
-# calibration_plot = True
+data_dir = "../data/outputs/seed_lr_batch_frac"
+output_dir = "."
+tensorboard_plot = True
+scatter_plot = True
+calibration_plot = True
 
 dpi = 300    
 

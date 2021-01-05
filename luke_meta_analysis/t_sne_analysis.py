@@ -1,19 +1,10 @@
 import numpy as np
 import os
-
 import json
 import seaborn as sns
-
 import matplotlib.pyplot as plt
-
-
-#from luke_confusion_matrix.confusion_matrix import * 
-
 from sklearn.manifold import TSNE
-
 import argparse
-
-
 
 # ================================================================================================
 
@@ -73,6 +64,12 @@ def tsne_3d(x, y, z, title, labels):
 
 # ================================================================================================
 
+#
+# data_dir = "../data/outputs/seed_experiment_500"
+# output_dir = "."
+# tsne_save = True
+#
+
 # Define path to data source: 
 
 parser = argparse.ArgumentParser()
@@ -89,16 +86,14 @@ data_dir = args.data_dir
 output_dir = args.output_dir
 tsne_save = args.tsne_save
 
+if tsne_save: 
+    print(data_dir)
+    print(output_dir)
+    print(tsne_save)
 
-#
-# data_dir = "../data/outputs/seed_experiment_500"
-# output_dir = "."
-# tsne_save = True
-#
+
 
 def run():
-    t_sne_dir = os.path.join(output_dir, "t_sne_plots")
-
     logits = []
     for root, dirs, files in os.walk(data_dir):
         
@@ -135,15 +130,14 @@ def run():
     # 3D: 
     one_two_thr = tsne_3d(one, two, thr, title, ["1st T-SNE component", "2nd T-SNE component", "3rd T-SNE component"])
 
-
+    t_sne_dir = os.path.join(output_dir, "t_sne_plots")
     if not os.path.exists(t_sne_dir):
-        os.mkdir(os.path.join(t_sne_dir)
+        os.mkdir(t_sne_dir)
 
     if tsne_save: 
         one_two.savefig(f"{t_sne_dir}/one_two")
         one_thr.savefig(f"{t_sne_dir}/one_thr")
         two_thr.savefig(f"{t_sne_dir}/two_thr")
-
         one_two_thr.savefig(f"{t_sne_dir}/one_two_thr")
 
 if __name__ == "__main__":
