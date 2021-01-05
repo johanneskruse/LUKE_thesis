@@ -75,7 +75,7 @@ def tsne_3d(x, y, z, title, labels):
 
 # Define path to data source: 
 
-# parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser()
 
 parser.add_argument("--data-dir", default="data/outputs/seed_experiment_500")
 parser.add_argument("--output-dir", default="luke_meta_analysis")
@@ -86,21 +86,20 @@ parser.set_defaults(tsne_save=True)
 args = parser.parse_args()
 
 data_dir = args.data_dir
-tsne_output_dir = args.tsne_output_dir
+output_dir = args.output_dir
 tsne_save = args.tsne_save
- 
-#
-# data_dir = "../data/outputs/seed_experiment_500"
-# output_dir = "."
-# tsne_save = True
-#
 
-def run()
 
+# #
+# # data_dir = "../data/outputs/seed_experiment_500"
+# # output_dir = "."
+# # tsne_save = True
+# #
+
+def run():
     t_sne_dir = os.path.join(output_dir, "t_sne_plots")
 
     logits = []
-
     for root, dirs, files in os.walk(data_dir):
         
         for dir_ in dirs: 
@@ -115,10 +114,7 @@ def run()
             dev_test = {"dev": {}, "test": {}}
             eval_sets = ['dev', 'test']
 
-
             logits.append(flatten(evaluations["dev"]["predict_logits"]))
-
-
 
 
     matrix = np.array(flatten(logits)).reshape(-1, len(logits))
