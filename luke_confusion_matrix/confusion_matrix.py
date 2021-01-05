@@ -101,7 +101,7 @@ args = parser.parse_args()
 data_dir = args.data_dir
 cm_output_dir = args.cm_output_dir
 cm_save = args.cm_save
- 
+
 # data_dir = "../data/outputs/paper_reconstruction/OpenEntity/results.json"
 
 # ================================================
@@ -163,10 +163,10 @@ def run():
     # ================================================================================================
 
     if cm_save: 
-        if not os.path.exists("confusion_matrix/multi_label_all"):
-            os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_all")
+        if not os.path.exists(f"{cm_output_dir}/multi_label_all"):
+            os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_all", exist_ok=True)
         if not os.path.exists(f"{cm_output_dir}/confusion_matrix/multi_label_only"):
-            os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_only")
+            os.makedirs(f"{cm_output_dir}/confusion_matrix/multi_label_only", exist_ok=True)
         else: 
             pass
 
