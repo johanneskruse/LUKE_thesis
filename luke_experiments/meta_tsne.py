@@ -7,9 +7,7 @@ from sklearn.manifold import TSNE
 import argparse
 from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
 
-print(os.getcwd())
-
-from ..luke_experiment.luke_confusion_matrix.confusion_matrix import one_hot_encoding, add_reject_entry, split_multi_single
+from confusion_matrix import one_hot_encoding, add_reject_entry, split_multi_single
 
 # ================================================================================================
 
@@ -93,8 +91,8 @@ def tsne_3d(x, y, z, title, labels):
     return figure
 
 
-def save_tsne(one_two, one_thr, two_thr, one_two_thr, title, save_dir = "luke_meta_analysis"):    
-    t_sne_dir = os.path.join(save_dir, "t_sne_plots")
+def save_tsne(one_two, one_thr, two_thr, one_two_thr, title, save_dir = "luke_experiments"):    
+    t_sne_dir = os.path.join(save_dir, "plots_tsne")
     if not os.path.exists(t_sne_dir):
         os.mkdir(t_sne_dir)
 
