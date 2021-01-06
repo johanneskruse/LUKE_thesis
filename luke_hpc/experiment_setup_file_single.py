@@ -47,7 +47,7 @@ train_batch_size = 4                # list(range(2,22,2))
 gradient_accumulation_steps = 2     # default 1 
 learning_rate = 1e-5                # [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10]
 num_train_epochs = 10
-seed = list(range(340,501,1))         # 12 # list(range(10,21,1))
+seed = list(range(370,501,1))         # 12 # list(range(10,21,1))
 saving_model = "dont-save-model"
 train_frac_size = 1.0               # 1.0 # np.round(np.arange(0.2, 2.2, 0.2),2)
 
@@ -91,7 +91,7 @@ for loop_item in loop_items:
 
 
 # Move: out and err files: 
-out_err_folder = "luke_experiment/out_err_folder_hpc"
+out_err_folder = "luke_hpc/out_err_folder_hpc"
 if not os.path.exists(f"{out_err_folder}"):
     os.makedirs(f"{out_err_folder}")
 

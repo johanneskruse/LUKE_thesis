@@ -7,7 +7,9 @@ from sklearn.manifold import TSNE
 import argparse
 from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
 
-from luke_confusion_matrix.confusion_matrix import *
+print(os.getcwd())
+
+from ..luke_experiment.luke_confusion_matrix.confusion_matrix import one_hot_encoding, add_reject_entry, split_multi_single
 
 # ================================================================================================
 
@@ -39,9 +41,6 @@ def tsne_plots(matrix):
     one_two_thr = tsne_3d(one, two, thr, title, ["1st T-SNE component", "2nd T-SNE component", "3rd T-SNE component"])
 
     return one_two, one_thr, two_thr, one_two_thr
-
-
-
 
 
 def tsne_2d(x, y, title, labels):
@@ -196,8 +195,6 @@ def run():
             save_tsne(one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing, f"{eval_set}_single_label_only")
             save_tsne(one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only, f"{eval_set}_multi_label_only")
             save_tsne(one_two_all, one_thr_all, two_thr_all, one_two_thr_all, f"{eval_set}_multi_label_all")
-
-
 
 
 if __name__ == "__main__":
