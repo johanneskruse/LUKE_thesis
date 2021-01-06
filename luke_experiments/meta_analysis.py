@@ -7,7 +7,7 @@ import numpy as np
 from argparse import Namespace
 import click
 
-from functions import *
+from meta_analysis.functions import *
 
 import matplotlib.pyplot as plt
 
@@ -31,8 +31,8 @@ dpi = 300
 
 
 @click.command()
-@click.option("--data-dir", default="data/outputs/OpenEntity", type=click.Path(exists=True))
-@click.option("--output-dir", default="luke_meta_analysis")
+@click.option("--data-dir", default="data/outputs/seed_lr_batch_frac", type=click.Path(exists=True))
+@click.option("--output-dir", default="luke_experiments/plots_meta_analysis")
 @click.option("--tensorboard-plot/--no-tensorboard-plot", default=True)
 @click.option("--scatter-plot/--no-scatter-plot", default=True)
 @click.option("--calibration-plot/--no-calibration-plot", default=True)
@@ -216,7 +216,7 @@ def run(**task_args):
                 cal_plot = plot_calibration_curve(true, pred, model_name=labels, title=title, n_bins=10)
                 #plt.tight_layout()
 
-                cal_plot.savefig(f"luke_meta_analysis/calibration_plots/{experiment_tag}_{eval_set}", dpi=dpi)
+                cal_plot.savefig(f"{output_dir}/calibration_plots/{experiment_tag}_{eval_set}", dpi=dpi)
                 
 ####### COPY END #######
 

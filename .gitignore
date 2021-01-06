@@ -11,9 +11,9 @@ data
 luke_large_500k.tar.gz
 apex
 
-
 # # Output Files
-luke_experiment/out_err_folder_hpc
+luke_hpc/out_err_folder_hpc
+luke_experiments/plots_meta_analysis
 all_files
 output/*/
 output*

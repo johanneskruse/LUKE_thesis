@@ -136,7 +136,7 @@ python -m examples.cli --num-gpus=8 --model-file=luke_large_500k.tar.gz --output
 
 To generate the event files for Tensorboard run: 
 ```bash
-python -m luke_meta_analysis.meta_analysis --data-dir [path/to/experiment_output]
+python -m luke_experiments.meta_analysis --data-dir [path/to/experiment_output]
 ```
 
 Here data-dir is the path to the experiments that contain all folders with experiments. Thus, in an experiment multiple experiment folder exists, where each of them contain a result.json file ([robust_seed_1, robust_seed_2, robust_seed_3, etc.)
@@ -155,7 +155,7 @@ The default is true.
 Run tensorboard: 
 
 ```bash
-tensorboard --logdir luke_meta_analysis/runs_tensorboards
+tensorboard --logdir luke_experiments/plots_meta_analysis/runs_tensorboards
 ```
 
 This is the default path.
