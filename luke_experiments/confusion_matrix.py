@@ -171,9 +171,9 @@ def run_cm():
 
     if cm_save: 
         if not os.path.exists(f"{cm_output_dir}/multi_label_all"):
-            os.makedirs(f"{cm_output_dir}/plot_confusion_matrix/multi_label_all", exist_ok=True)
-        if not os.path.exists(f"{cm_output_dir}/plot_confusion_matrix/multi_label_only"):
-            os.makedirs(f"{cm_output_dir}/plot_confusion_matrix/multi_label_only", exist_ok=True)
+            os.makedirs(f"{cm_output_dir}/plots_confusion_matrix/multi_label_all", exist_ok=True)
+        if not os.path.exists(f"{cm_output_dir}/plots_confusion_matrix/multi_label_only"):
+            os.makedirs(f"{cm_output_dir}/plots_confusion_matrix/multi_label_only", exist_ok=True)
         else: 
             pass
 
@@ -183,19 +183,19 @@ def run_cm():
     for i, cm in enumerate(confusion_matrices["dev"]["multi_label_all"]):
         multi_label_all = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
         if cm_save: 
-            multi_label_all.savefig(f"{cm_output_dir}/plot_confusion_matrix/multi_label_all/multi_all_{labels[i]}.png", dpi=dpi)
+            multi_label_all.savefig(f"{cm_output_dir}/plots_confusion_matrix/multi_label_all/multi_all_{labels[i]}.png", dpi=dpi)
     
     for i, cm in enumerate(confusion_matrices["dev"]["multi_label_only"]):
         multi_label_only = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
         if cm_save: 
-            multi_label_only.savefig(f"{cm_output_dir}/plot_confusion_matrix/multi_label_only/multi_{labels[i]}.png", dpi=dpi)
+            multi_label_only.savefig(f"{cm_output_dir}/plots_confusion_matrix/multi_label_only/multi_{labels[i]}.png", dpi=dpi)
 
 
     # Single label: 
     single_label = plot_cm(cm = confusion_matrices["dev"]["single_label_only"]["confusion_matrix"], 
                             class_names = labels[1:], normalize=True, cbar=True)
     if cm_save:
-        single_label.savefig(f"{cm_output_dir}/plot_confusion_matrix/single_label_only.png", dpi=dpi)
+        single_label.savefig(f"{cm_output_dir}/plots_confusion_matrix/single_label_only.png", dpi=dpi)
 
     print("Done!")
 
@@ -203,5 +203,5 @@ def run_cm():
 # ================================================================================================
 
 
-# if __name__ == "__main__":
-#     run_cm()
+if __name__ == "__main__":
+    run_cm()

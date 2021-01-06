@@ -13,7 +13,7 @@ apex
 
 # # Output Files
 luke_hpc/out_err_folder_hpc
-luke_experiments/plots_meta_analysis
+luke_experiments/plot*
 all_files
 output/*/
 output*
