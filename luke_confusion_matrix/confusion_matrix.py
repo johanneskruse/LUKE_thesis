@@ -1,4 +1,4 @@
-from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix, f1_score
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
 import json
 import numpy as np
 import os
@@ -50,6 +50,33 @@ def logit2prob(logits):
     return prob
 
 
+def split_multi_single(y_true, y_pred):
+    y_true_single = np.array([])
+    y_pred_single = np.array([])
+        
+    y_true_multi = np.array([])
+    y_pred_multi = np.array([])
+
+    num_entities = len(y_true[0])
+
+    for i in range(len(y_pred)):
+        if sum(y_true[i,:]) <= 1 and sum(y_pred[i,:]) <=1: 
+            y_true_single = np.append(y_true_single, y_true[i,:])
+            y_pred_single = np.append(y_pred_single, y_pred[i,:])
+        else: 
+            y_true_multi = np.append(y_true_multi, y_true[i,:])
+            y_pred_multi = np.append(y_pred_multi, y_pred[i,:])
+    
+    # Reshape: 
+    y_true_single = np.reshape(y_true_single, (-1,num_entities))
+    y_pred_single = np.reshape(y_pred_single, (-1,num_entities))   
+    
+    y_true_multi = np.reshape(y_true_multi, (-1,num_entities))
+    y_pred_multi = np.reshape(y_pred_multi, (-1,num_entities)) 
+
+    return y_true_single, y_pred_single, y_true_multi, y_pred_multi
+
+
 def plot_cm(cm, class_names, normalize=False, cbar=True, font_scale=1.5, title=False):
     """
     Returns a matplotlib figure containing the plotted confusion matrix.
@@ -83,6 +110,8 @@ def plot_cm(cm, class_names, normalize=False, cbar=True, font_scale=1.5, title=F
     plt.xlabel('Predicted label')
     plt.tight_layout()
     return figure
+
+
 
 # ================================================================================================
 
@@ -125,29 +154,8 @@ def run():
         confusion_matrices[eval_set]["multi_label_all"] = multilabel_confusion_matrix(y_true, y_pred)
 
         ##############################
-        #### Removing multi-label ####
-        y_true_single = np.array([])
-        y_pred_single = np.array([])
-        
-        y_true_multi = np.array([])
-        y_pred_multi = np.array([])
-
-        num_entities = len(y_true[0])
-
-        for i in range(len(y_pred)):
-            if sum(y_true[i,:]) <= 1 and sum(y_pred[i,:]) <=1: 
-                y_true_single = np.append(y_true_single, y_true[i,:])
-                y_pred_single = np.append(y_pred_single, y_pred[i,:])
-            else: 
-                y_true_multi = np.append(y_true_multi, y_true[i,:])
-                y_pred_multi = np.append(y_pred_multi, y_pred[i,:])
-
-        # Reshape: 
-        y_true_single = np.reshape(y_true_single, (-1,num_entities))
-        y_pred_single = np.reshape(y_pred_single, (-1,num_entities))
-
-        y_true_multi = np.reshape(y_true_multi, (-1,num_entities))
-        y_pred_multi = np.reshape(y_pred_multi, (-1,num_entities))
+        #### Splitting into multi-label and single labelled ####
+        y_true_single, y_pred_single, y_true_multi, y_pred_multi = split_multi_single(y_true, y_pred)
 
         # The category index: 
         true_entity_single = y_true_single.argmax(axis=1)
