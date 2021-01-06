@@ -143,12 +143,13 @@ Here data-dir is the path to the experiments that contain all folders with exper
 
 You will have to manually adjust the experimental tags of which the experimentent  ("learning_rate")
 
-The output-dir is default: 'luke_meta_analysis' (the same as the scripts). Note you can disable a meta-analysis plot (true/false): 
+The output-dir is default: 'luke_experiments' (the same as the scripts). Note, the script also provides scatter and calibration plots for each model output. You can disable a meta-analysis plot (true/false): 
 - "--tensorboard-plot/--no-tensorboard-plot" 
 - "--scatter-plot/--no-scatter-plot"
 - "--calibration-plot/--no-calibration-plot"
 
-The default is true.
+
+The default is True.
 
 **Run the Tensorboard:**
 
@@ -158,7 +159,7 @@ Run tensorboard:
 tensorboard --logdir luke_experiments/plots_meta_analysis/runs_tensorboards
 ```
 
-This is the default path.
+This is the default output path from ```meta_analysis.py```.
 
 ## Citation
 

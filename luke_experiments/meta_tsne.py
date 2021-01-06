@@ -92,9 +92,9 @@ def tsne_3d(x, y, z, title, labels):
 
 
 def save_tsne(one_two, one_thr, two_thr, one_two_thr, title, save_dir = "luke_experiments"):    
-    t_sne_dir = os.path.join(save_dir, "plots_tsne")
+    t_sne_dir = os.path.join(save_dir, "plots_meta_analysis", "plots_tsne")
     if not os.path.exists(t_sne_dir):
-        os.mkdir(t_sne_dir)
+        os.makedirs(t_sne_dir)
 
     one_two.savefig(f"{t_sne_dir}/{title}_one_two")
     one_thr.savefig(f"{t_sne_dir}/{title}_one_thr")
@@ -115,7 +115,7 @@ def save_tsne(one_two, one_thr, two_thr, one_two_thr, title, save_dir = "luke_ex
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--data-dir", default="data/outputs/seed_experiment_500")
-parser.add_argument("--output-dir", default="luke_meta_analysis")
+parser.add_argument("--output-dir", default="luke_experiments")
 parser.add_argument('--save-tsne', dest='tsne_save', action='store_true')
 parser.add_argument('--no-save-tsne', dest='tsne_save', action='store_false')
 parser.set_defaults(tsne_save=True)
@@ -197,60 +197,3 @@ def run():
 
 if __name__ == "__main__":
     run()
-
-
-
-
-
-# def add_reject_entry(one_hot_dataset):
-#     # Add reject as class: 
-#     for i, array in enumerate(one_hot_dataset): 
-#         if sum(array) > 0:
-#             one_hot_dataset[i] = np.append(array, 0)
-#         else:
-#             one_hot_dataset[i] = np.append(array, 1)
-#     return one_hot_dataset
-
-
-# def one_hot_encoding(dataset, add_reject=True):
-#     # One-hot encode and change type to np.array: 
-#     one_hot = [(np.array(z) > 0)*1 for z in dataset]    
-    
-#     if add_reject:
-#         # Add rejection as a class
-#         one_hot = add_reject_entry(one_hot)
-
-#     # Make matrix: 
-#     num_entities = len(one_hot[0])
-#     one_hot = np.concatenate(one_hot)
-
-#     one_hot = np.reshape(one_hot, (-1, num_entities))
-
-#     return one_hot
-
-
-# def split_multi_single(y_true, y_pred):
-#     y_true_single = np.array([])
-#     y_pred_single = np.array([])
-        
-#     y_true_multi = np.array([])
-#     y_pred_multi = np.array([])
-
-#     num_entities = len(y_true[0])
-
-#     for i in range(len(y_pred)):
-#         if sum(y_true[i,:]) <= 1 and sum(y_pred[i,:]) <=1: 
-#             y_true_single = np.append(y_true_single, y_true[i,:])
-#             y_pred_single = np.append(y_pred_single, y_pred[i,:])
-#         else: 
-#             y_true_multi = np.append(y_true_multi, y_true[i,:])
-#             y_pred_multi = np.append(y_pred_multi, y_pred[i,:])
-    
-#     # Reshape: 
-#     y_true_single = np.reshape(y_true_single, (-1,num_entities))
-#     y_pred_single = np.reshape(y_pred_single, (-1,num_entities))   
-    
-#     y_true_multi = np.reshape(y_true_multi, (-1,num_entities))
-#     y_pred_multi = np.reshape(y_pred_multi, (-1,num_entities)) 
-
-#     return y_true_single, y_pred_single, y_true_multi, y_pred_multi
