@@ -15,7 +15,7 @@ from confusion_matrix import one_hot_encoding, add_reject_entry, split_multi_sin
 flatten = lambda t: [item for sublist in t for item in sublist]
 
 
-def tsne_plots(matrix):
+def tsne_compoments(matrix):
     """
     Returns a matplotlib figure containing the 2D and 3D T-SNE plots.
     
@@ -137,9 +137,13 @@ def run():
         for dir_ in dirs: 
 
             result_json = os.path.join(root, dir_, "results.json")
-
-            with open(result_json) as json_file:
-                data = json.load(json_file)
+            
+            try:
+                with open(result_json) as json_file:
+                    data = json.load(json_file)
+            except:
+                print(f"{dir_} does not contain a results.json")
+                continue
 
             evaluations = data["evaluation_predict_label"]
 
@@ -185,9 +189,9 @@ def run():
         matrix_multi_label_only = np.array(flatten(flatten(flatten(multi_label_only)))).reshape(-1, features_multi)
 
 
-        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_plots(matrix_sinlge)
-        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_plots(matrix_multi_label_only)
-        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_plots(matrix_multi_label_all)
+        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_compoments(matrix_sinlge)
+        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_compoments(matrix_multi_label_only)
+        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_compoments(matrix_multi_label_all)
 
         if tsne_save: 
             save_tsne(one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing, f"{eval_set}_single_label_only")

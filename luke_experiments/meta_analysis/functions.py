@@ -78,8 +78,8 @@ def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     # ===== Finishing touch =====
     # Add: Title, grid, axes-naming, and tighten plot
     ax.set_title(title, size="x-large") 
-    ax.set_ylabel(axes[0], fontsize="large")
-    ax.set_xlabel(axes[1], fontsize="large")
+    ax.set_xlabel(axes[0], fontsize="large")
+    ax.set_ylabel(axes[1], fontsize="large")
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
