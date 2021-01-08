@@ -41,6 +41,8 @@ def run(common_args, **task_args):
 
     set_seed(args.seed)
 
+    args.model_config.hidden_dropout_prob = 0.5
+
     args.experiment.log_parameters({p.name: getattr(args, p.name) for p in run.params})
 
     args.model_config.vocab_size += 2
