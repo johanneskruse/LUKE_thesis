@@ -48,7 +48,7 @@ train_batch_size = 4                # list(range(2,22,2))
 gradient_accumulation_steps = 2     # default 1 
 learning_rate = 1e-5                # [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10]
 num_train_epochs = 10
-seed = list(range(458,501,1))         # 12 # list(range(10,21,1))
+seed = list(range(458,501,1))       # 12 # list(range(10,21,1))
 saving_model = "dont-save-model"
 train_frac_size = 1.0               # 1.0 # np.round(np.arange(0.2, 2.2, 0.2),2)
 
@@ -88,11 +88,11 @@ for loop_item in loop_items:
         f"--{saving_model}",
         f"--num-train-epochs={num_train_epochs}", 
         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}", 
-        f"--learning-rate={learning_rate}", 
-        f"--train-frac-size={train_frac_size}" 
-        f"--weight-decay={weight_decay}" 
-        f"--hidden-dropout-prob={hidden_dropout_prob}" 
+        f"--train-batch-size={train_batch_size}",
+        f"--learning-rate={learning_rate}",
+        f"--train-frac-size={train_frac_size}",
+        f"--weight-decay={weight_decay}",
+        f"--hidden-dropout-prob={hidden_dropout_prob}"
     ))
 
 

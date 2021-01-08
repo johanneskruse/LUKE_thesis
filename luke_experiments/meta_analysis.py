@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 # ==============================================================================
 
 class config():
-    tags = ["learning_rate", "seed", "train_batch_size", "train_frac_size"]
+    tags = ["learning_rate", "seed", "train_batch_size", "train_frac_size", "hidden_dropout_prob", "weight_decay"]
     eval_sets = ["dev", "test"]
 
 data_dir = "../data/outputs/seed_lr_batch_frac"
@@ -214,11 +214,9 @@ def run(**task_args):
                 if "robust_" in labels[0]:
                     labels = [label[7:] for label in labels]
                 cal_plot = plot_calibration_curve(true, pred, model_name=labels, title=title, n_bins=10)
-                #plt.tight_layout()
 
                 cal_plot.savefig(f"{output_dir}/calibration_plots/{experiment_tag}_{eval_set}", dpi=dpi)
                 
-####### COPY END #######
 
 # ==============================================================================
 

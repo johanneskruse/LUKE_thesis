@@ -43,6 +43,8 @@ model_file  = "luke_large_500k.tar.gz"
 data_dir    = "data/OpenEntity"
 output_dir  = "data/outputs/weight_decay_dropout" # "data/outputs/OpenEntity"
 
+
+
 ### Hyperparameters: 
 train_batch_sizes = list(range(2,22,2))     # 4         
 gradient_accumulation_steps = 2             # default 1 
@@ -52,8 +54,10 @@ seeds = list(range(10,21,1))                # 12
 saving_model = "dont-save-model"
 train_frac_sizes = np.round(np.arange(0.2, 2.2, 0.2),2)     # 1.0      
 
-weight_decays = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10] # 0.01
-hidden_dropout_probs = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10] # 0.1
+weight_decays = [0.001, 0.003, 0.005, 0.008, 0.01, 0.03, 0.05, 0.08, 0.1] # 0.01
+hidden_dropout_probs = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] # 0.1
+
+
 
 # ========================================================================
 
@@ -61,11 +65,13 @@ hidden_dropout_probs = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e
 for weight_decay in weight_decays: 
 
     ######
+    
     # Change:
     seed = 12
     train_batch_size = 4
     learning_rate = 1e-5
     train_frac_size = 1.0
+    # weight_decay = 0.01
     hidden_dropout_prob = 0.1
 
     # Naming: 
@@ -95,13 +101,13 @@ for weight_decay in weight_decays:
         f"--fp16",
         f"--seed={seed}", 
         f"--{saving_model}",
-        f"--num-train-epochs={num_train_epochs}", 
+        f"--num-train-epochs={num_train_epochs}",
         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}", 
-        f"--learning-rate={learning_rate}", 
-        f"--train-frac-size={train_frac_size}" 
-        f"--weight-decay={weight_decay}" 
-        f"--hidden-dropout-prob={hidden_dropout_prob}" 
+        f"--train-batch-size={train_batch_size}",
+        f"--learning-rate={learning_rate}",
+        f"--train-frac-size={train_frac_size}",
+        f"--weight-decay={weight_decay}",
+        f"--hidden-dropout-prob={hidden_dropout_prob}"
     ))
 
 
@@ -109,16 +115,19 @@ for weight_decay in weight_decays:
 for hidden_dropout_prob in hidden_dropout_probs: 
 
     ######
+
     # Change:
     seed = 12
     train_batch_size = 4
     learning_rate = 1e-5
     train_frac_size = 1.0
     weight_decay = 0.01
+    # hidden_dropout_prob = 0.1
 
     # Naming: 
     experiment_tag = "hidden_dropout_prob"
     loop_item = hidden_dropout_prob
+    
     ######
 
     if type(loop_item) is np.float64:
@@ -153,7 +162,7 @@ for hidden_dropout_prob in hidden_dropout_probs:
 
 
 # Move: out and err files: 
-out_err_folder = "luke_experiment/out_err_folder_hpc"
+out_err_folder = "luke_hpc/out_err_folder_hpc"
 if not os.path.exists(f"{out_err_folder}"):
     os.makedirs(f"{out_err_folder}")
 
