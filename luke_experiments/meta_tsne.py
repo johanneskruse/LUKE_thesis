@@ -15,7 +15,7 @@ from confusion_matrix import one_hot_encoding, add_reject_entry, split_multi_sin
 flatten = lambda t: [item for sublist in t for item in sublist]
 
 
-def tsne_compoments(matrix):
+def tsne_compoments(matrix, title):
     """
     Returns a matplotlib figure containing the 2D and 3D T-SNE plots.
     
@@ -28,7 +28,6 @@ def tsne_compoments(matrix):
     one = data_matrix[:,0]
     two = data_matrix[:,1]
     thr = data_matrix[:,2]
-    title = "T-SNE - Seed Experiment"
 
     # 2D: 
     one_two = tsne_2d(one, two, title=title, labels=["1st T-SNE component", "2nd T-SNE component"])
@@ -80,7 +79,6 @@ def tsne_3d(x, y, z, title, labels):
     plt.rc('font', size=30)
     plt.rc('axes', titlesize=35)
     labelpad = 30
-    #€plt.rc('axes', titlesize=28)
 
     figure = plt.figure(figsize=(12,12))
     ax = figure.add_subplot(projection='3d')
@@ -191,10 +189,9 @@ def run():
         matrix_multi_label_all  = np.array(flatten(flatten(flatten(multi_label_all)))).reshape(-1, features_multi)
         matrix_multi_label_only = np.array(flatten(flatten(flatten(multi_label_only)))).reshape(-1, features_multi)
 
-
-        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_compoments(matrix_sinlge)
-        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_compoments(matrix_multi_label_only)
-        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_compoments(matrix_multi_label_all)
+        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_compoments(matrix_sinlge, title="T-SNE - Seed Experiment\nSingle-labelled")
+        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_compoments(matrix_multi_label_only, title="T-SNE - Seed Experiment\nMulti-labelled")
+        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_compoments(matrix_multi_label_all, title="T-SNE - Seed Experiment\nSingle-labelled & Multi-labelled")
 
         if tsne_save: 
             save_tsne(one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing, f"{eval_set}_single_label_only")
