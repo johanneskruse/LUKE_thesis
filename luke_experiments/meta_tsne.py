@@ -50,11 +50,11 @@ def tsne_2d(x, y, title, labels):
         title: string with name of the plot
         labels: list of strings with label names: [x, y, z]
     """
-    plt.rcParams.update({'font.size': 60, 'legend.fontsize': 20})
-    plt.rc('font', size=50)
-    plt.rc('axes', titlesize=50)
+    plt.rcParams.update({'font.size': 40, 'legend.fontsize': 20})
+    plt.rc('font', size=30)
+    plt.rc('axes', titlesize=35)
 
-    figure, ax = plt.subplots(figsize=(14, 12))
+    figure, ax = plt.subplots(figsize=(10, 10))
     ax.scatter(x, y)
     ax.set_title(title) 
     ax.set_xlabel(labels[0])
@@ -64,6 +64,7 @@ def tsne_2d(x, y, title, labels):
     plt.tight_layout()
 
     return figure    
+
 
 
 def tsne_3d(x, y, z, title, labels):
@@ -76,16 +77,18 @@ def tsne_3d(x, y, z, title, labels):
         labels: list of strings with label names: [x, y, z]
     """
     plt.rcParams.update({'font.size': 30, 'legend.fontsize': 20})
-    plt.rc('font', size=25)
-    plt.rc('axes', titlesize=25)
+    plt.rc('font', size=30)
+    plt.rc('axes', titlesize=35)
+    labelpad = 30
+    #€plt.rc('axes', titlesize=28)
 
-    figure = plt.figure(figsize=(18,12))
+    figure = plt.figure(figsize=(12,12))
     ax = figure.add_subplot(projection='3d')
     ax.scatter(x, y, z)
     ax.set_title(title) 
-    ax.set_xlabel(labels[0])
-    ax.set_ylabel(labels[1])
-    ax.set_zlabel(labels[2])
+    ax.set_xlabel(labels[0], labelpad=labelpad)
+    ax.set_ylabel(labels[1], labelpad=labelpad)
+    ax.set_zlabel(labels[2], labelpad=labelpad)
     plt.tight_layout()
 
     return figure

@@ -115,25 +115,25 @@ def plot_cm(cm, class_names, normalize=False, cbar=True, font_scale=1.5, title=F
 # ================================================================================================
 
 # Define path to data source: 
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument("--data-dir", default="data/outputs/paper_reconstruction/OpenEntity/results.json")
-parser.add_argument("--cm-output-dir", default="luke_experiments")
-parser.add_argument('--save-cm', dest='cm_save', action='store_true')
-parser.add_argument('--no-save-cm', dest='cm_save', action='store_false')
-parser.set_defaults(cm_save=True)
-
-args = parser.parse_args()
-
-data_dir = args.data_dir
-cm_output_dir = args.cm_output_dir
-cm_save = args.cm_save
-
 # data_dir = "../data/outputs/paper_reconstruction/OpenEntity/results.json"
 
 # ================================================
 def run_cm():
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--data-dir", default="data/outputs/paper_reconstruction/OpenEntity/results.json")
+    parser.add_argument("--cm-output-dir", default="luke_experiments")
+    parser.add_argument('--save-cm', dest='cm_save', action='store_true')
+    parser.add_argument('--no-save-cm', dest='cm_save', action='store_false')
+    parser.set_defaults(cm_save=True)
+
+    args = parser.parse_args()
+
+    data_dir = args.data_dir
+    cm_output_dir = args.cm_output_dir
+    cm_save = args.cm_save
+
     with open(data_dir) as json_file:
         data = json.load(json_file)
 
