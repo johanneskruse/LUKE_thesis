@@ -15,6 +15,7 @@ def trainer_args(func):
     @click.option("--learning-rate", default=1e-5)
     @click.option("--lr-schedule", default="warmup_linear", type=click.Choice(["warmup_linear", "warmup_constant"]))
     @click.option("--weight-decay", default=0.01)
+    @click.option("--hidden-dropout-prob", default=0.1)
     @click.option("--max-grad-norm", default=0.0)
     @click.option("--adam-b1", default=0.9)
     @click.option("--adam-b2", default=0.98)

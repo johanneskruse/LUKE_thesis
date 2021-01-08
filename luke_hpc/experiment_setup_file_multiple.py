@@ -3,7 +3,7 @@ This script is made for running the command prompts inside a python script for r
 
 To change parameter: data-dir = data_dir, num-train-epochs = num_train_epochs, etc. 
 
-    # examples/utils/trainer.py: 
+    # examples/entity_typing/main.py: 
     @click.option("--data-dir", default="data/open_entity", type=click.Path(exists=True))
     @click.option("--do-train/--no-train", default=True)
     @click.option("--train-batch-size", default=2)
@@ -12,10 +12,11 @@ To change parameter: data-dir = data_dir, num-train-epochs = num_train_epochs, e
     @click.option("--num-train-epochs", default=3.0)
     @click.option("--seed", default=12)
     
-    # examples/entity_typing/main.py: 
+    # examples/utils/trainer.py: 
     @click.option("--learning-rate", default=1e-5)
     @click.option("--lr-schedule", default="warmup_linear", type=click.Choice(["warmup_linear", "warmup_constant"]))
     @click.option("--weight-decay", default=0.01)
+    @click.option("--hidden-dropout-prob", default=0.1) # Added by us
     @click.option("--max-grad-norm", default=0.0)
     @click.option("--adam-b1", default=0.9)
     @click.option("--adam-b2", default=0.98)
@@ -40,7 +41,7 @@ import numpy as np
 # Path parameters: 
 model_file  = "luke_large_500k.tar.gz"
 data_dir    = "data/OpenEntity"
-output_dir  = "data/outputs/seed_lr_batch_frac" # "data/outputs/OpenEntity"
+output_dir  = "data/outputs/weight_decay_dropout" # "data/outputs/OpenEntity"
 
 ### Hyperparameters: 
 train_batch_sizes = list(range(2,22,2))     # 4         
@@ -51,18 +52,27 @@ seeds = list(range(10,21,1))                # 12
 saving_model = "dont-save-model"
 train_frac_sizes = np.round(np.arange(0.2, 2.2, 0.2),2)     # 1.0      
 
+weight_decays = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10] # 0.01
+hidden_dropout_probs = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10] # 0.1
+
 # ========================================================================
 
 # Experiment: 
-for seed in seeds: 
+for weight_decay in weight_decays: 
 
+    ######
+    # Change:
+    seed = 12
     train_batch_size = 4
     learning_rate = 1e-5
     train_frac_size = 1.0
+    hidden_dropout_prob = 0.1
 
     # Naming: 
-    experiment_tag = "seed"
-    loop_item = seed
+    experiment_tag = "weight_decay"
+    loop_item = weight_decay
+
+    ######
 
     if type(loop_item) is np.float64:
         loop_item_str = str(loop_item).replace(".", "_")
@@ -90,99 +100,26 @@ for seed in seeds:
         f"--train-batch-size={train_batch_size}", 
         f"--learning-rate={learning_rate}", 
         f"--train-frac-size={train_frac_size}" 
+        f"--weight-decay={weight_decay}" 
+        f"--hidden-dropout-prob={hidden_dropout_prob}" 
     ))
 
 
 # Experiment: 
-for train_batch_size in train_batch_sizes: 
+for hidden_dropout_prob in hidden_dropout_probs: 
 
-    seed = 12
-    learning_rate = 1e-5
-    train_frac_size = 1.0
-
-    # Naming: 
-    experiment_tag = "train_batch_size"
-    loop_item = train_batch_size
-
-    if type(loop_item) is np.float64:
-        loop_item_str = str(loop_item).replace(".", "_")
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
-    else:
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
-    
-    if os.path.exists(temp_output_dir): 
-        continue 
-        # examples/cli.py -> makes output_dir
-    
-    # Terminal command: 
-    subprocess.call((
-        f"python", "-m",
-        f"examples.cli", 
-        f"--model-file={model_file}",
-        f"--output-dir={temp_output_dir}",
-        f"entity-typing", "run",
-        f"--data-dir={data_dir}",
-        f"--fp16",
-        f"--seed={seed}", 
-        f"--{saving_model}",
-        f"--num-train-epochs={num_train_epochs}", 
-        f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}", 
-        f"--learning-rate={learning_rate}", 
-        f"--train-frac-size={train_frac_size}" 
-    ))
-
-
-# Experiment: 
-for learning_rate in learning_rates: 
-
-    seed = 12
-    train_batch_size = 4
-    train_frac_size = 1.0
-
-    # Naming: 
-    experiment_tag = "learning_rate"
-    loop_item = learning_rate
-
-    if type(loop_item) is np.float64:
-        loop_item_str = str(loop_item).replace(".", "_")
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
-    else:
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
-    
-    if os.path.exists(temp_output_dir): 
-        continue 
-        # examples/cli.py -> makes output_dir
-    
-    # Terminal command: 
-    subprocess.call((
-        f"python", "-m",
-        f"examples.cli", 
-        f"--model-file={model_file}",
-        f"--output-dir={temp_output_dir}",
-        f"entity-typing", "run",
-        f"--data-dir={data_dir}",
-        f"--fp16",
-        f"--seed={seed}", 
-        f"--{saving_model}",
-        f"--num-train-epochs={num_train_epochs}", 
-        f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}", 
-        f"--learning-rate={learning_rate}", 
-        f"--train-frac-size={train_frac_size}" 
-    ))
-
-
-# Experiment: 
-for train_frac_size in train_frac_sizes: 
-
+    ######
+    # Change:
     seed = 12
     train_batch_size = 4
     learning_rate = 1e-5
+    train_frac_size = 1.0
+    weight_decay = 0.01
 
     # Naming: 
-    experiment_tag = "train_frac_size"
-    loop_item = train_frac_size
+    experiment_tag = "hidden_dropout_prob"
+    loop_item = hidden_dropout_prob
+    ######
 
     if type(loop_item) is np.float64:
         loop_item_str = str(loop_item).replace(".", "_")
@@ -210,6 +147,8 @@ for train_frac_size in train_frac_sizes:
         f"--train-batch-size={train_batch_size}", 
         f"--learning-rate={learning_rate}", 
         f"--train-frac-size={train_frac_size}" 
+        f"--weight-decay={weight_decay}" 
+        f"--hidden-dropout-prob={hidden_dropout_prob}" 
     ))
 
 

@@ -41,6 +41,8 @@ def run(common_args, **task_args):
 
     set_seed(args.seed)
 
+    args.model_config.hidden_dropout_prob = args.hidden_dropout_prob
+
     args.experiment.log_parameters({p.name: getattr(args, p.name) for p in run.params})
     args.model_config.vocab_size += 1
     word_emb = args.model_weights["embeddings.word_embeddings.weight"]

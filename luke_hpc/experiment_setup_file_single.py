@@ -16,6 +16,7 @@ To change parameter: data-dir = data_dir, num-train-epochs = num_train_epochs, e
     @click.option("--learning-rate", default=1e-5)
     @click.option("--lr-schedule", default="warmup_linear", type=click.Choice(["warmup_linear", "warmup_constant"]))
     @click.option("--weight-decay", default=0.01)
+    @click.option("--hidden-dropout-prob", default=0.1) # Added by us
     @click.option("--max-grad-norm", default=0.0)
     @click.option("--adam-b1", default=0.9)
     @click.option("--adam-b2", default=0.98)
@@ -47,9 +48,12 @@ train_batch_size = 4                # list(range(2,22,2))
 gradient_accumulation_steps = 2     # default 1 
 learning_rate = 1e-5                # [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10]
 num_train_epochs = 10
-seed = list(range(370,501,1))         # 12 # list(range(10,21,1))
+seed = list(range(458,501,1))         # 12 # list(range(10,21,1))
 saving_model = "dont-save-model"
 train_frac_size = 1.0               # 1.0 # np.round(np.arange(0.2, 2.2, 0.2),2)
+
+weight_decays = 0.01                # [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10] # 0.01
+hidden_dropout_probs = 0.1          # [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10] # 0.1
 
 # ========================================================================
 # Naming: 
@@ -87,6 +91,8 @@ for loop_item in loop_items:
         f"--train-batch-size={train_batch_size}", 
         f"--learning-rate={learning_rate}", 
         f"--train-frac-size={train_frac_size}" 
+        f"--weight-decay={weight_decay}" 
+        f"--hidden-dropout-prob={hidden_dropout_prob}" 
     ))
 
 
