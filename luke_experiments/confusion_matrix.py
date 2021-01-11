@@ -178,24 +178,24 @@ def run_cm():
             pass
 
     dpi = 300
-
+    eval_set_see = "test"
     # Example: 
-    for i, cm in enumerate(confusion_matrices["dev"]["multi_label_all"]):
+    for i, cm in enumerate(confusion_matrices[eval_set_see]["multi_label_all"]):
         multi_label_all = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
         if cm_save: 
-            multi_label_all.savefig(f"{cm_output_dir}/plots_confusion_matrix/multi_label_all/multi_all_{labels[i]}.png", dpi=dpi)
+            multi_label_all.savefig(f"{cm_output_dir}/plots_confusion_matrix/multi_label_all/{eval_set_see}_multi_all_{labels[i]}.png", dpi=dpi)
     
-    for i, cm in enumerate(confusion_matrices["dev"]["multi_label_only"]):
+    for i, cm in enumerate(confusion_matrices[eval_set_see]["multi_label_only"]):
         multi_label_only = plot_cm(cm = cm, class_names = ["other", labels[i]], normalize=True, cbar=True, font_scale=4, title=False)
         if cm_save: 
-            multi_label_only.savefig(f"{cm_output_dir}/plots_confusion_matrix/multi_label_only/multi_{labels[i]}.png", dpi=dpi)
+            multi_label_only.savefig(f"{cm_output_dir}/plots_confusion_matrix/multi_label_only/{eval_set_see}_multi_{labels[i]}.png", dpi=dpi)
 
 
     # Single label: 
     single_label = plot_cm(cm = confusion_matrices["dev"]["single_label_only"]["confusion_matrix"], 
                             class_names = labels[1:], normalize=True, cbar=True)
     if cm_save:
-        single_label.savefig(f"{cm_output_dir}/plots_confusion_matrix/single_label_only.png", dpi=dpi)
+        single_label.savefig(f"{cm_output_dir}/plots_confusion_matrix/{eval_set_see}_single_label_only.png", dpi=dpi)
 
     print("Done!")
 

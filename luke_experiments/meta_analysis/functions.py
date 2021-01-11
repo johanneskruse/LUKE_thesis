@@ -92,8 +92,8 @@ def plot_calibration_curve(y_true, y_pred_prob, model_name, title, n_bins=5, nor
     Returns a matplotlib figure containing the plotted calibration plot.
     
     Args:
-        y_true (array, shape = [n, n]): binary matrix with true labels
-        y_pred_prob (array, shape = [n, n]): Probability matrix with predicted labels
+        y_true: array-like of shape (n_samples,) of true target
+        y_pred_prob: array-like of shape (n_samples,) probabilities of the positive class.
         model_name: name of model(s) to be plotted
         normalize: Whether y_prob needs to be normalized into the [0, 1] interval
         n_bins: Number of bins to discretize the [0, 1] interval. 
@@ -109,8 +109,9 @@ def plot_calibration_curve(y_true, y_pred_prob, model_name, title, n_bins=5, nor
         plt.plot(x, y, marker = '.', label = model_name)
     else: 
         for i in range(len(model_name)):
-            x, y = calibration_curve(y_true[i], y_pred_prob[i], n_bins=n_bins, normalize=normalize)
-            plt.plot(x, y, marker = '.', label = model_name[i]) 
+            fraction_of_positives, mean_predicted_value = calibration_curve(y_true[i], y_pred_prob[i], n_bins=n_bins, normalize=normalize)
+            
+            plt.plot(mean_predicted_value, fraction_of_positives, marker = '.', label = model_name[i]) 
 
     plt.plot([0, 1], [0, 1], linestyle = '--', color="black") 
 
