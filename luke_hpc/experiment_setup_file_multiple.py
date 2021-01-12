@@ -55,61 +55,11 @@ saving_model = "dont-save-model"
 train_frac_sizes = np.round(np.arange(0.2, 2.2, 0.2),2)     # 1.0      
 
 weight_decays = [0.001, 0.003, 0.005, 0.008, 0.01, 0.03, 0.05, 0.08, 0.1] # 0.01
-hidden_dropout_probs = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] # 0.1
+hidden_dropout_probs = np.round(np.arange(0.1, 1, 0.1),2) # 0.1
 
 
 
 # ========================================================================
-
-# Experiment: 
-for weight_decay in weight_decays: 
-
-    ######
-    
-    # Change:
-    seed = 12
-    train_batch_size = 4
-    learning_rate = 1e-5
-    train_frac_size = 1.0
-    # weight_decay = 0.01
-    hidden_dropout_prob = 0.1
-
-    # Naming: 
-    experiment_tag = "weight_decay"
-    loop_item = weight_decay
-
-    ######
-
-    if type(loop_item) is np.float64:
-        loop_item_str = str(loop_item).replace(".", "_")
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
-    else:
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
-    
-    if os.path.exists(temp_output_dir): 
-        continue 
-        # examples/cli.py -> makes output_dir
-    
-    # Terminal command: 
-    subprocess.call((
-        f"python", "-m",
-        f"examples.cli", 
-        f"--model-file={model_file}",
-        f"--output-dir={temp_output_dir}",
-        f"entity-typing", "run",
-        f"--data-dir={data_dir}",
-        f"--fp16",
-        f"--seed={seed}", 
-        f"--{saving_model}",
-        f"--num-train-epochs={num_train_epochs}",
-        f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}",
-        f"--learning-rate={learning_rate}",
-        f"--train-frac-size={train_frac_size}",
-        f"--weight-decay={weight_decay}",
-        f"--hidden-dropout-prob={hidden_dropout_prob}"
-    ))
-
 
 # Experiment: 
 for hidden_dropout_prob in hidden_dropout_probs: 
@@ -143,22 +93,75 @@ for hidden_dropout_prob in hidden_dropout_probs:
     # Terminal command: 
     subprocess.call((
         f"python", "-m",
-        f"examples.cli", 
+        f"examples.cli",
         f"--model-file={model_file}",
         f"--output-dir={temp_output_dir}",
         f"entity-typing", "run",
         f"--data-dir={data_dir}",
         f"--fp16",
-        f"--seed={seed}", 
+        f"--seed={seed}",
         f"--{saving_model}",
-        f"--num-train-epochs={num_train_epochs}", 
+        f"--num-train-epochs={num_train_epochs}",
         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}", 
-        f"--learning-rate={learning_rate}", 
-        f"--train-frac-size={train_frac_size}" 
-        f"--weight-decay={weight_decay}" 
-        f"--hidden-dropout-prob={hidden_dropout_prob}" 
+        f"--train-batch-size={train_batch_size}",
+        f"--learning-rate={learning_rate}",
+        f"--train-frac-size={train_frac_size}",
+        f"--weight-decay={weight_decay}",
+        f"--hidden-dropout-prob={hidden_dropout_prob}"
     ))
+
+
+# # Experiment: 
+# for weight_decay in weight_decays: 
+
+#     ######
+    
+#     # Change:
+#     seed = 12
+#     train_batch_size = 4
+#     learning_rate = 1e-5
+#     train_frac_size = 1.0
+#     # weight_decay = 0.01
+#     hidden_dropout_prob = 0.1
+
+#     # Naming: 
+#     experiment_tag = "weight_decay"
+#     loop_item = weight_decay
+
+#     ######
+
+#     if type(loop_item) is np.float64:
+#         loop_item_str = str(loop_item).replace(".", "_")
+#         temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
+#     else:
+#         temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
+    
+#     if os.path.exists(temp_output_dir): 
+#         continue 
+#         # examples/cli.py -> makes output_dir
+    
+#     # Terminal command: 
+#     subprocess.call((
+#         f"python", "-m",
+#         f"examples.cli", 
+#         f"--model-file={model_file}",
+#         f"--output-dir={temp_output_dir}",
+#         f"entity-typing", "run",
+#         f"--data-dir={data_dir}",
+#         f"--fp16",
+#         f"--seed={seed}", 
+#         f"--{saving_model}",
+#         f"--num-train-epochs={num_train_epochs}",
+#         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
+#         f"--train-batch-size={train_batch_size}",
+#         f"--learning-rate={learning_rate}",
+#         f"--train-frac-size={train_frac_size}",
+#         f"--weight-decay={weight_decay}",
+#         f"--hidden-dropout-prob={hidden_dropout_prob}"
+#     ))
+
+
+
 
 
 # Move: out and err files: 
