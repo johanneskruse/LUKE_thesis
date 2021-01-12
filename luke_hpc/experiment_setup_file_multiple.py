@@ -33,135 +33,102 @@ To change parameter: data-dir = data_dir, num-train-epochs = num_train_epochs, e
 
 '''
 
+
+
 # ========================================================================
 import os
 import subprocess
 import numpy as np
-
-# Path parameters: 
-model_file  = "luke_large_500k.tar.gz"
-data_dir    = "data/OpenEntity"
-output_dir  = "data/outputs/weight_decay_dropout" # "data/outputs/OpenEntity"
+import inspect
 
 
+def retrieve_name(var):
+    callers_local_vars = inspect.currentframe().f_back.f_locals.items()
+    return [var_name for var_name, var_val in callers_local_vars if var_val is var]
 
-### Hyperparameters: 
-train_batch_sizes = list(range(2,22,2))     # 4         
-gradient_accumulation_steps = 2             # default 1 
-learning_rates = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10]  # 1e-5      
-num_train_epochs = 10
-seeds = list(range(10,21,1))                # 12        
-saving_model = "dont-save-model"
-train_frac_sizes = np.round(np.arange(0.2, 2.2, 0.2),2)     # 1.0      
 
-weight_decays = [0.001, 0.003, 0.005, 0.008, 0.01, 0.03, 0.05, 0.08, 0.1] # 0.01
-hidden_dropout_probs = np.round(np.arange(0.1, 1, 0.1),2) # 0.1
+def experiment(output_dir=".", **kwags):
+    # Path parameters: 
+    model_file  = "luke_large_500k.tar.gz"
+    data_dir    = "data/OpenEntity"
+    output_dir  = output_dir 
+    saving_model= "dont-save-model"
 
+    # Hyperparameter: 
+    train_batch_size            = 2
+    gradient_accumulation_steps = 2
+    learning_rate               = 1e-5
+    num_train_epochs            = 10
+    seed                        = 12
+    train_frac_size             = 1.0
+    weight_decay                = 0.01
+    hidden_dropout_prob         = 0.1
+
+    experiment_tag = list(kwags.keys())[0]
+    loop_items = list(kwags.values())[0]
+
+    # Experiment: 
+    for loop_item in loop_items: 
+        # Naming:         
+        if experiment_tag == "gradient_accumulation_steps":
+            gradient_accumulation_steps = loop_item
+        if experiment_tag == "num_train_epochs":
+            num_train_epochs = loop_item
+        if experiment_tag == "train_batch_size":
+            train_batch_size = loop_item
+            gradient_accumulation_steps = 1
+        if experiment_tag == "learning_rate":
+            learning_rate = loop_item
+        if experiment_tag == "seed":
+            seed = loop_item
+        if experiment_tag == "train_frac_size":
+            train_frac_size = loop_item
+        if experiment_tag == "weight_decay":
+            weight_decay = loop_item
+        if experiment_tag == "hidden_dropout_probs":
+            hidden_dropout_prob = loop_item
+
+        if type(loop_item) is np.float64:
+            loop_item_str = str(loop_item).replace(".", "_")
+            temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
+        else:
+            temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
+        
+        if os.path.exists(temp_output_dir): 
+            continue 
+            # examples/cli.py -> makes output_dir
+        
+        # Terminal command: 
+        subprocess.call((
+            f"python", "-m",
+            f"examples.cli",
+            f"--model-file={model_file}",
+            f"--output-dir={temp_output_dir}",
+            f"entity-typing", "run",
+            f"--data-dir={data_dir}",
+            f"--fp16",
+            f"--seed={seed}",
+            f"--{saving_model}",
+            f"--num-train-epochs={num_train_epochs}",
+            f"--gradient-accumulation-steps={gradient_accumulation_steps}",
+            f"--train-batch-size={train_batch_size}",
+            f"--learning-rate={learning_rate}",
+            f"--train-frac-size={train_frac_size}",
+            f"--weight-decay={weight_decay}",
+            f"--hidden-dropout-prob={hidden_dropout_prob}"
+        ))
 
 
 # ========================================================================
 
-# Experiment: 
-for hidden_dropout_prob in hidden_dropout_probs: 
 
-    ######
-
-    # Change:
-    seed = 12
-    train_batch_size = 4
-    learning_rate = 1e-5
-    train_frac_size = 1.0
-    weight_decay = 0.01
-    # hidden_dropout_prob = 0.1
-
-    # Naming: 
-    experiment_tag = "hidden_dropout_prob"
-    loop_item = hidden_dropout_prob
-    
-    ######
-
-    if type(loop_item) is np.float64:
-        loop_item_str = str(loop_item).replace(".", "_")
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
-    else:
-        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
-    
-    if os.path.exists(temp_output_dir): 
-        continue 
-        # examples/cli.py -> makes output_dir
-    
-    # Terminal command: 
-    subprocess.call((
-        f"python", "-m",
-        f"examples.cli",
-        f"--model-file={model_file}",
-        f"--output-dir={temp_output_dir}",
-        f"entity-typing", "run",
-        f"--data-dir={data_dir}",
-        f"--fp16",
-        f"--seed={seed}",
-        f"--{saving_model}",
-        f"--num-train-epochs={num_train_epochs}",
-        f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-        f"--train-batch-size={train_batch_size}",
-        f"--learning-rate={learning_rate}",
-        f"--train-frac-size={train_frac_size}",
-        f"--weight-decay={weight_decay}",
-        f"--hidden-dropout-prob={hidden_dropout_prob}"
-    ))
-
-
-# # Experiment: 
-# for weight_decay in weight_decays: 
-
-#     ######
-    
-#     # Change:
-#     seed = 12
-#     train_batch_size = 4
-#     learning_rate = 1e-5
-#     train_frac_size = 1.0
-#     # weight_decay = 0.01
-#     hidden_dropout_prob = 0.1
-
-#     # Naming: 
-#     experiment_tag = "weight_decay"
-#     loop_item = weight_decay
-
-#     ######
-
-#     if type(loop_item) is np.float64:
-#         loop_item_str = str(loop_item).replace(".", "_")
-#         temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
-#     else:
-#         temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
-    
-#     if os.path.exists(temp_output_dir): 
-#         continue 
-#         # examples/cli.py -> makes output_dir
-    
-#     # Terminal command: 
-#     subprocess.call((
-#         f"python", "-m",
-#         f"examples.cli", 
-#         f"--model-file={model_file}",
-#         f"--output-dir={temp_output_dir}",
-#         f"entity-typing", "run",
-#         f"--data-dir={data_dir}",
-#         f"--fp16",
-#         f"--seed={seed}", 
-#         f"--{saving_model}",
-#         f"--num-train-epochs={num_train_epochs}",
-#         f"--gradient-accumulation-steps={gradient_accumulation_steps}",
-#         f"--train-batch-size={train_batch_size}",
-#         f"--learning-rate={learning_rate}",
-#         f"--train-frac-size={train_frac_size}",
-#         f"--weight-decay={weight_decay}",
-#         f"--hidden-dropout-prob={hidden_dropout_prob}"
-#     ))
-
-
-
+output_dir = "data/outputs/seed_lr_batch_frac_weightdecay_dropout"
+experiment(output_dir=output_dir, train_frac_size = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0])       # Default: 1.0
+experiment(output_dir=output_dir, learning_rate = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10])    # Default: 1e-5  
+experiment(output_dir=output_dir, train_batch_size = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512])                       # Default: 4 [2 + gradient_accumulation_steps = 2]
+experiment(output_dir=output_dir, seed = list(range(10,21,1)))                                                      # Default: 12     
+experiment(output_dir=output_dir, weight_decay = [1e-6, 1e-5, 1e-4, 1e-3, 0.005, 0.01, 0.05, 0.1, 0.5, 1])          # Default: 0.01
+experiment(output_dir=output_dir, hidden_dropout_prob = np.round(np.arange(0.1, 1, 0.1),2))                         # Default: 0.01
 
 
 # Move: out and err files: 

@@ -45,8 +45,6 @@ def run(**task_args):
     scatter_plot = args.scatter_plot
     calibration_plot = args.calibration_plot
     
-    ####### COPY START #######
-
     tensorboard_event_folder = os.path.join(output_dir, "runs_tensorboards") 
 
     # Tag used for the tensorboard: 

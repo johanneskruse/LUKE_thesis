@@ -37,6 +37,6 @@ conda activate luke
 python luke_hpc/experiment_setup_file_multiple.py 
 
 # Paper reconstruction:
-#python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/OpenEntity entity-typing run --data-dir=data/OpenEntity --fp16 --dont-save-model --gradient-accumulation-steps=2 --learning-rate=1e-5 --train-batch-size=4 --num-train-epochs=3
-#python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/tacred_1 relation-classification run --data-dir=data/TACRED --fp16 --train-batch-size=32 --gradient-accumulation-steps=8 --learning-rate=1e-5 --num-train-epochs=5
-#python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/conll2003_1 ner run --data-dir=data/CoNLL2003 --fp16 --train-batch-size=8 --gradient-accumulation-steps=2 --learning-rate=1e-5 --num-train-epochs=5 
+#python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/OpenEntity entity-typing run --data-dir=data/OpenEntity --fp16 --dont-save-model --gradient-accumulation-steps=2 --learning-rate=1e-5 --train-batch-size=2 --num-train-epochs=3
+#python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/tacred_1 relation-classification run --data-dir=data/TACRED --fp16 --train-batch-size=4 --gradient-accumulation-steps=8 --learning-rate=1e-5 --num-train-epochs=5
+#python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/conll2003_1 ner run --data-dir=data/CoNLL2003 --fp16 --train-batch-size=4 --gradient-accumulation-steps=2 --learning-rate=1e-5 --num-train-epochs=5 

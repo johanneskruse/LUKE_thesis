@@ -117,7 +117,7 @@ def plot_3d(x, y, z, title, labels):
     return figure
 
 
-def save_plot(one_two, one_thr, two_thr, one_two_thr, title, plot_type="test", save_dir = "luke_experiments"):    
+def save_plot(one_two, one_thr, two_thr, one_two_thr, title, plot_type="pca_tsne", save_dir = "luke_experiments"):    
     temp_dir = os.path.join(save_dir, "plots_meta_analysis", plot_type)
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)

@@ -44,7 +44,7 @@ data_dir    = "data/OpenEntity"
 output_dir  = "data/outputs/seed_experiment_500" # "data/outputs/OpenEntity"
 
 ### Hyperparameters: 
-train_batch_size = 4                # list(range(2,22,2))
+train_batch_size = 2                # list(range(2,22,2))
 gradient_accumulation_steps = 2     # default 1 
 learning_rate = 1e-5                # [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10]
 num_train_epochs = 10
