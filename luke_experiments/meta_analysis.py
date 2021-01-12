@@ -7,7 +7,7 @@ import numpy as np
 from argparse import Namespace
 import click
 
-from meta_analysis.functions import *
+from function_meta_analysis.functions import *
 
 import matplotlib.pyplot as plt
 
@@ -213,7 +213,7 @@ def run(**task_args):
 
                 if "robust_" in labels[0]:
                     labels = [label[7:] for label in labels]
-                cal_plot = plot_calibration_curve(true, pred, model_name=labels, title=title, n_bins=10)
+                cal_plot = plot_calibration_curve_with_hist(true, pred, model_name=labels, title=title, n_bins=10)
 
                 cal_plot.savefig(f"{output_dir}/calibration_plots/{experiment_tag}_{eval_set}", dpi=dpi)
                 
@@ -222,3 +222,52 @@ def run(**task_args):
 
 if __name__ == '__main__':
     run()
+
+
+
+y_true, y_pred_prob, model_name, title, n_bins = true, pred, labels, "as", 10
+
+def plot_calibration_curve_with_hist(y_true, y_pred_prob, model_name, title, n_bins=10, normalize=False):
+    """
+    Returns a matplotlib figure containing the plotted calibration plot.
+    
+    Args:
+        y_true: array-like of shape (n_samples,) of true target
+        y_pred_prob: array-like of shape (n_samples,) probabilities of the positive class.
+        model_name: name of model(s) to be plotted
+        normalize: Whether y_prob needs to be normalized into the [0, 1] interval
+        n_bins: Number of bins to discretize the [0, 1] interval. 
+    """
+
+    figure = plt.figure(figsize=(14,10))
+    ax1 = plt.subplot2grid((3, 1), (0, 0), rowspan=2)
+    ax2 = plt.subplot2grid((3, 1), (2, 0))
+    
+    # Ideal calibration line: 
+    ax1.plot([0, 1], [0, 1], linestyle = '--', label = 'Ideally Calibrated', color="black") 
+
+    if type(model_name) == str: 
+        x, y = calibration_curve(y_true, y_pred_prob, n_bins=n_bins, normalize=normalize)
+        plt.plot(x, y, marker = '.', label = model_name)
+    else: 
+        for i in range(len(model_name)):
+            fraction_of_positives, mean_predicted_value = calibration_curve(y_true[i], y_pred_prob[i], n_bins=n_bins, normalize=normalize)
+            ax1.plot(mean_predicted_value, fraction_of_positives, marker = '.', label = model_name[i]) 
+            ax2.hist(y_pred_prob[i], range=(0, 1), bins=n_bins, label=model_name, histtype="step", lw=2)
+
+    ax1.plot([0, 1], [0, 1], linestyle = '--', color="black") 
+
+    ax1.set_title(title, size="x-large")
+    ax1.grid()
+    ax1.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize="medium")
+    ax1.tick_params(axis='x', labelsize="large")
+    ax1.tick_params(axis='y', labelsize="large")
+    ax1.set_ylabel('Fraction of positives', fontsize="large") 
+
+    ax2.tick_params(axis='x', labelsize="large")
+    ax2.tick_params(axis='y', labelsize="large")
+    ax2.set_xlabel("Mean predicted value")
+    ax2.set_ylabel("Count", fontsize="large")
+
+    plt.tight_layout()
+    return figure

@@ -30,9 +30,9 @@ def tsne_compoments(matrix, title):
     thr = data_matrix[:,2]
 
     # 2D: 
-    one_two = tsne_2d(one, two, title=title, labels=["1st T-SNE component", "2nd T-SNE component"])
-    one_thr = tsne_2d(one, thr, title=title, labels=["1st T-SNE component", "3rd T-SNE component"])
-    two_thr = tsne_2d(two, thr, title=title, labels=["2nd T-SNE component", "3rd T-SNE component"])
+    one_two = tsne_2d(one, two, title=title, labels=["1st t-SNE component", "2nd T-SNE component"])
+    one_thr = tsne_2d(one, thr, title=title, labels=["1st t-SNE component", "3rd T-SNE component"])
+    two_thr = tsne_2d(two, thr, title=title, labels=["2nd t-SNE component", "3rd T-SNE component"])
 
     # 3D: 
     one_two_thr = tsne_3d(one, two, thr, title, ["1st T-SNE component", "2nd T-SNE component", "3rd T-SNE component"])
@@ -189,9 +189,9 @@ def run():
         matrix_multi_label_all  = np.array(flatten(flatten(flatten(multi_label_all)))).reshape(-1, features_multi)
         matrix_multi_label_only = np.array(flatten(flatten(flatten(multi_label_only)))).reshape(-1, features_multi)
 
-        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_compoments(matrix_sinlge, title="T-SNE - Seed Experiment\nSingle-labelled")
-        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_compoments(matrix_multi_label_only, title="T-SNE - Seed Experiment\nMulti-labelled")
-        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_compoments(matrix_multi_label_all, title="T-SNE - Seed Experiment\nSingle-labelled & Multi-labelled")
+        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_compoments(matrix_sinlge, title="t-SNE - Seed Experiment\nSingle-labelled")
+        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_compoments(matrix_multi_label_only, title="t-SNE - Seed Experiment\nMulti-labelled")
+        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_compoments(matrix_multi_label_all, title="t-SNE - Seed Experiment\nSingle-labelled & Multi-labelled")
 
         if tsne_save: 
             save_tsne(one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing, f"{eval_set}_single_label_only")
