@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import argparse
 from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
+from sklearn.decomposition import PCA
 
 from confusion_matrix import one_hot_encoding, add_reject_entry, split_multi_single
 
@@ -15,9 +16,9 @@ from confusion_matrix import one_hot_encoding, add_reject_entry, split_multi_sin
 flatten = lambda t: [item for sublist in t for item in sublist]
 
 
-def tsne_compoments(matrix, title):
+def tsne_plot(matrix, title):
     """
-    Returns a matplotlib figure containing the 2D and 3D T-SNE plots.
+    Returns a matplotlib figure containing the 2D and 3D t-SNE plots.
     
     Args:
         matrix: ndarray of (n_samples, n_features)
@@ -30,17 +31,42 @@ def tsne_compoments(matrix, title):
     thr = data_matrix[:,2]
 
     # 2D: 
-    one_two = tsne_2d(one, two, title=title, labels=["1st t-SNE component", "2nd T-SNE component"])
-    one_thr = tsne_2d(one, thr, title=title, labels=["1st t-SNE component", "3rd T-SNE component"])
-    two_thr = tsne_2d(two, thr, title=title, labels=["2nd t-SNE component", "3rd T-SNE component"])
+    one_two = plot_2d(one, two, title=title, labels=["1st t-SNE component", "2nd T-SNE component"])
+    one_thr = plot_2d(one, thr, title=title, labels=["1st t-SNE component", "3rd T-SNE component"])
+    two_thr = plot_2d(two, thr, title=title, labels=["2nd t-SNE component", "3rd T-SNE component"])
 
     # 3D: 
-    one_two_thr = tsne_3d(one, two, thr, title, ["1st T-SNE component", "2nd T-SNE component", "3rd T-SNE component"])
+    one_two_thr = plot_3d(one, two, thr, title, ["1st T-SNE component", "2nd T-SNE component", "3rd T-SNE component"])
 
     return one_two, one_thr, two_thr, one_two_thr
 
 
-def tsne_2d(x, y, title, labels):
+def pca_plot(matrix, title):
+    """
+    Returns a matplotlib figure containing the 2D and 3D PCA plots.
+    
+    Args:
+        matrix: ndarray of (n_samples, n_features)
+    """
+    # Note, input should be: X: 
+    data_matrix = PCA(n_components=3).fit_transform(matrix)
+    # Define compoments: 
+    one = data_matrix[:,0]
+    two = data_matrix[:,1]
+    thr = data_matrix[:,2]
+
+    # 2D: 
+    one_two = plot_2d(one, two, title=title, labels=["1st PCA component", "2nd T-SNE component"])
+    one_thr = plot_2d(one, thr, title=title, labels=["1st PCA component", "3rd T-SNE component"])
+    two_thr = plot_2d(two, thr, title=title, labels=["2nd PCA component", "3rd T-SNE component"])
+
+    # 3D: 
+    one_two_thr = plot_3d(one, two, thr, title, ["1st PCA component", "2nd PCA component", "3rd PCA component"])
+
+    return one_two, one_thr, two_thr, one_two_thr
+
+
+def plot_2d(x, y, title, labels):
     """
     Returns a matplotlib figure containing the 2D T-SNE plot.
     
@@ -65,8 +91,7 @@ def tsne_2d(x, y, title, labels):
     return figure    
 
 
-
-def tsne_3d(x, y, z, title, labels):
+def plot_3d(x, y, z, title, labels):
     """
     Returns a matplotlib figure containing the 3D T-SNE plot.
     
@@ -92,23 +117,23 @@ def tsne_3d(x, y, z, title, labels):
     return figure
 
 
-def save_tsne(one_two, one_thr, two_thr, one_two_thr, title, save_dir = "luke_experiments"):    
-    t_sne_dir = os.path.join(save_dir, "plots_meta_analysis", "plots_tsne")
-    if not os.path.exists(t_sne_dir):
-        os.makedirs(t_sne_dir)
+def save_plot(one_two, one_thr, two_thr, one_two_thr, title, plot_type="test", save_dir = "luke_experiments"):    
+    temp_dir = os.path.join(save_dir, "plots_meta_analysis", plot_type)
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
 
-    one_two.savefig(f"{t_sne_dir}/{title}_one_two")
-    one_thr.savefig(f"{t_sne_dir}/{title}_one_thr")
-    two_thr.savefig(f"{t_sne_dir}/{title}_two_thr")
-    one_two_thr.savefig(f"{t_sne_dir}/{title}_one_two_thr")
+    one_two.savefig(f"{temp_dir}/{title}_one_two")
+    one_thr.savefig(f"{temp_dir}/{title}_one_thr")
+    two_thr.savefig(f"{temp_dir}/{title}_two_thr")
+    one_two_thr.savefig(f"{temp_dir}/{title}_one_two_thr")
 
 
 # ================================================================================================
 
 #
-# data_dir = "../data/outputs/seed_experiment_500"
-# output_dir = "."
-# tsne_save = True
+data_dir = "../data/outputs/seed_experiment_500"
+output_dir = "."
+tsne_save = True
 #
 
 # Define path to data source: 
@@ -120,12 +145,16 @@ parser.add_argument("--output-dir", default="luke_experiments")
 parser.add_argument('--save-tsne', dest='tsne_save', action='store_true')
 parser.add_argument('--no-save-tsne', dest='tsne_save', action='store_false')
 parser.set_defaults(tsne_save=True)
+parser.add_argument('--save-pca', dest='pca_save', action='store_true')
+parser.add_argument('--no-save-pca', dest='pca_save', action='store_false')
+parser.set_defaults(pca_save=True)
 
 args = parser.parse_args()
 
 data_dir = args.data_dir
 output_dir = args.output_dir
 tsne_save = args.tsne_save
+pca_save = args.pca_save
 
 
 def run():
@@ -185,18 +214,26 @@ def run():
 
         # Flatten list
         matrix_sinlge = np.array(flatten(flatten(single_label_only))).reshape(-1, features_single) 
-        
         matrix_multi_label_all  = np.array(flatten(flatten(flatten(multi_label_all)))).reshape(-1, features_multi)
         matrix_multi_label_only = np.array(flatten(flatten(flatten(multi_label_only)))).reshape(-1, features_multi)
 
-        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_compoments(matrix_sinlge, title="t-SNE - Seed Experiment\nSingle-labelled")
-        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_compoments(matrix_multi_label_only, title="t-SNE - Seed Experiment\nMulti-labelled")
-        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_compoments(matrix_multi_label_all, title="t-SNE - Seed Experiment\nSingle-labelled & Multi-labelled")
+        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_plot(matrix_sinlge, title="t-SNE - Seed Experiment\nSingle-labelled")
+        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_plot(matrix_multi_label_only, title="t-SNE - Seed Experiment\nMulti-labelled")
+        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_plot(matrix_multi_label_all, title="t-SNE - Seed Experiment\nSingle-labelled & Multi-labelled")
+
+        pca_one_two_sing, pca_one_thr_sing, pca_two_thr_sing, pca_one_two_thr_sing = pca_plot(matrix_sinlge, title="PCA - Seed Experiment\nSingle-labelled")
+        pca_one_two_m_only, pca_one_thr_m_only, pca_two_thr_m_only, pca_one_two_thr_m_only = pca_plot(matrix_multi_label_only, title="PCA - Seed Experiment\nMulti-labelled")
+        pca_one_two_all, pca_one_thr_all, pca_two_thr_all, pca_one_two_thr_all = pca_plot(matrix_multi_label_all, title="PCA - Seed Experiment\nSingle-labelled & Multi-labelled")
 
         if tsne_save: 
-            save_tsne(one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing, f"{eval_set}_single_label_only")
-            save_tsne(one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only, f"{eval_set}_multi_label_only")
-            save_tsne(one_two_all, one_thr_all, two_thr_all, one_two_thr_all, f"{eval_set}_multi_label_all")
+            save_plot(one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing, f"{eval_set}_single_label_only", plot_type="plots_tsne")
+            save_plot(one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only, f"{eval_set}_multi_label_only", plot_type="plots_tsne")
+            save_plot(one_two_all, one_thr_all, two_thr_all, one_two_thr_all, f"{eval_set}_multi_label_all", plot_type="plots_tsne")
+        
+        if pca_save:
+            save_plot(pca_one_two_sing, pca_one_thr_sing, pca_two_thr_sing, pca_one_two_thr_sing, title=f"{eval_set}_single_label_only", plot_type="plots_pca")
+            save_plot(pca_one_two_m_only, pca_one_thr_m_only, pca_two_thr_m_only, pca_one_two_thr_m_only, f"{eval_set}_multi_label_only", plot_type="plots_pca")
+            save_plot(pca_one_two_all, pca_one_thr_all, pca_two_thr_all, pca_one_two_thr_all, f"{eval_set}_multi_label_all", plot_type="plots_pca")
 
 
 if __name__ == "__main__":
