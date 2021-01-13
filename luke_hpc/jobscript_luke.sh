@@ -33,8 +33,7 @@
 source ~/.bashrc
 conda activate luke
 
-#python luke_hpc/experiment_setup_file_single.py 
-python luke_hpc/experiment_setup_file_multiple.py 
+python luke_hpc/experiment_setup_file.py 
 
 # Paper reconstruction:
 #python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/paper_reconstruction/OpenEntity entity-typing run --data-dir=data/OpenEntity --fp16 --dont-save-model --gradient-accumulation-steps=2 --learning-rate=1e-5 --train-batch-size=2 --num-train-epochs=3
