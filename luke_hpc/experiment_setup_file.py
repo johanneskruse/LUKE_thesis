@@ -76,7 +76,7 @@ def experiment(output_dir=".", **kwags):
             num_train_epochs = loop_item
         if experiment_tag == "train_batch_size":
             train_batch_size = loop_item
-            gradient_accumulation_steps = 1
+            gradient_accumulation_steps = 2
         if experiment_tag == "learning_rate":
             learning_rate = loop_item
         if experiment_tag == "seed":
@@ -122,17 +122,19 @@ def experiment(output_dir=".", **kwags):
 # ========================================================================
 
 
-output_dir = "data/outputs/seed_lr_batch_frac_weightdecay_dropout"
-experiment(output_dir=output_dir, train_frac_size = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0])       # Default: 1.0
-experiment(output_dir=output_dir, learning_rate = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10])    # Default: 1e-5  
-experiment(output_dir=output_dir, train_batch_size = [1, 2, 4, 8, 16, 32, 64])                       # Default: 4 [2 + gradient_accumulation_steps = 2] # RAM cap: 64 samples
-experiment(output_dir=output_dir, seed = list(range(10,21,1)))                                                      # Default: 12     
-experiment(output_dir=output_dir, weight_decay = [1e-6, 1e-5, 1e-4, 1e-3, 0.005, 0.01, 0.05, 0.1, 0.5, 1])          # Default: 0.01
-experiment(output_dir=output_dir, hidden_dropout_prob = np.round(np.arange(0.1, 1, 0.1),2))                         # Default: 0.01
+output_dir = "data/outputs/seed_lr_batch_frac_weightdecay_dropout_128"
+# experiment(output_dir=output_dir, train_frac_size = [0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0])       # Default: 1.0
+# experiment(output_dir=output_dir, learning_rate = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10])    # Default: 1e-5  
+# experiment(output_dir=output_dir, train_batch_size = [1, 2, 4, 8, 16, 32, 64])                                      # Default: 4 [2 + gradient_accumulation_steps = 2]
+# experiment(output_dir=output_dir, seed = list(range(10,21,1)))                                                      # Default: 12     
+# experiment(output_dir=output_dir, weight_decay = [1e-6, 1e-5, 1e-4, 1e-3, 0.005, 0.01, 0.05, 0.1, 0.5, 1])          # Default: 0.01
+# experiment(output_dir=output_dir, hidden_dropout_prob = np.round(np.arange(0.1, 1, 0.1),2))                         # Default: 0.01
 
 #
 #experiment(output_dir=output_dir, hidden_dropout_prob = [0.8, 0.9])                         # Default: 0.01
 #experiment(output_dir=output_dir, train_batch_size = [16, 32, 64]) # gradient_decent=8 // 128, 256, 512
+
+experiment(output_dir=output_dir, train_batch_size = 64)                                      # Default: 4 [2 + gradient_accumulation_steps = 2]
 
 # Move: out and err files: 
 out_err_folder = "luke_hpc/out_err_folder_hpc"

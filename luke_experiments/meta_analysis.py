@@ -19,7 +19,7 @@ class config():
     tags = ["learning_rate", "seed", "train_batch_size", "train_frac_size", "hidden_dropout_prob", "weight_decay"]
     eval_sets = ["dev", "test"]
 
-data_dir = "../data/outputs/seed_lr_batch_frac"
+data_dir = "../data/outputs/seed_lr_batch_frac_weightdecay_dropout"
 output_dir = "."
 tensorboard_plot = True
 scatter_plot = True
@@ -80,7 +80,7 @@ def run(**task_args):
 
                 # Get parameters to model: 
                 if len(data["training_loss"]) % gradient_accumulation_steps != 0: 
-                    print(f"Odd number of global_steps and training_loss: {base_root}")
+                    # print(f"Odd number of global_steps and training_loss: {base_root}")
                     data["training_loss"].append(data["training_loss"][-1])
                     training_loss = np.mean(np.array(data["training_loss"]).reshape(-1, gradient_accumulation_steps), axis=1)
                 else: 
