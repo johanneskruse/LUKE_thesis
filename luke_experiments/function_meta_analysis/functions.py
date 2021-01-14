@@ -10,6 +10,19 @@ plt.rc('axes', titlesize=25)
 
 flatten = lambda t: [item for sublist in t for item in sublist]
 
+
+def name_changes(dict_org, dict_names):
+    for label_name in dict_org.keys():
+        if label_name in dict_names.keys(): 
+            dict_org[dict_names[label_name]] = dict_org.pop(label_name)
+    
+    for label_name in dict_org.keys():
+        if label_name in dict_names.keys(): 
+            dict_org[dict_names[label_name]] = dict_org.pop(label_name)
+    
+    return dict_org
+
+
 def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     """
     Returns a matplotlib figure containing the plotted scatter plot.
