@@ -69,7 +69,7 @@ def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     max_min = []
 
     # ===== Start Figure =====
-    figure, ax = plt.subplots(figsize=(14,9), constrained_layout=True)
+    figure, ax = plt.subplots(figsize=(14,9))
     
     for z, tag in enumerate(eval_dict):
         dev = eval_dict[tag][:,0]
