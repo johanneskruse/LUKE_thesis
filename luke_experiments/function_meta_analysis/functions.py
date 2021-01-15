@@ -47,6 +47,7 @@ def plot_f1(f1_scores, labels, title):
 
     return figure
 
+
 def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     """
     Returns a matplotlib figure containing the plotted scatter plot.
@@ -69,7 +70,7 @@ def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     max_min = []
 
     # ===== Start Figure =====
-    figure, ax = plt.subplots(figsize=(14,9))
+    figure, ax = plt.subplots(figsize=(14,9), constrained_layout=True)
     
     for z, tag in enumerate(eval_dict):
         dev = eval_dict[tag][:,0]
@@ -120,7 +121,6 @@ def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
-    plt.tight_layout()
     return figure
 
 
