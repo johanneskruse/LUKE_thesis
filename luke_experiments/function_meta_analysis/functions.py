@@ -23,6 +23,30 @@ def name_changes(dict_org, dict_names):
     return dict_org
 
 
+def plot_f1(f1_scores, labels, title):    
+    figure, ax = plt.subplots(figsize=(12,9))
+
+    for i, experiment in enumerate(sorted(f1_scores)):
+        ax.plot(f1_scores[experiment], marker=".")
+
+    ax.legend(labels, loc='center left', bbox_to_anchor=(1, 0.5), 
+                edgecolor="white", title="Model", fontsize="medium")
+
+    ax.set_xticks(range(0,len(f1_scores[experiment]))) 
+    ax.set_xticklabels(range(1,len(f1_scores[experiment])+1))
+    ax.set_title(f"F1-score training\n{title}", size="x-large") 
+    
+    ax.set_xlabel("Epoch", fontsize="large")
+    ax.set_ylabel("F1-score", fontsize="large")
+
+    plt.tick_params(axis='x', labelsize="large")
+    plt.tick_params(axis='y', labelsize="large")
+    plt.grid()
+    figure.tight_layout(rect=[0, 0.03, 1, 0.95])
+    #plt.tight_layout()
+
+    return figure
+
 def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     """
     Returns a matplotlib figure containing the plotted scatter plot.
@@ -96,7 +120,7 @@ def plot_scatter(eval_dict, labels, title, axes=["Development", "Test"]):
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
-    #plt.tight_layout()
+    plt.tight_layout()
     return figure
 
 
