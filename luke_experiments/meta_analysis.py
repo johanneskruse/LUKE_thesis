@@ -251,8 +251,6 @@ def run(**task_args):
                 labels = sorted(eval_results[experiment_tag])
                 if "a." in labels[0]:
                     labels = [label[2:] for label in labels]
-                
-                #title = labels[0].split("=")[0][:-1] 
 
                 if eval_set == "test":
                     title = "Test set"

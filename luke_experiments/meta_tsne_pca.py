@@ -217,13 +217,18 @@ def run():
         matrix_multi_label_all  = np.array(flatten(flatten(flatten(multi_label_all)))).reshape(-1, features_multi)
         matrix_multi_label_only = np.array(flatten(flatten(flatten(multi_label_only)))).reshape(-1, features_multi)
 
-        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_plot(matrix_sinlge, title=f"t-SNE - Seed Experiment\nSingle-labelled\n{eval_set}")
-        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_plot(matrix_multi_label_only, title=f"t-SNE - Seed Experiment\nMulti-labelled\n{eval_set}")
-        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_plot(matrix_multi_label_all, title=f"t-SNE - Seed Experiment\nSingle-labelled & Multi-labelled\n{eval_set}")
+        if eval_set == "test":
+            eval_title = "Test set"
+        if eval_set == "dev":
+            eval_title = "Development set"
 
-        pca_one_two_sing, pca_one_thr_sing, pca_two_thr_sing, pca_one_two_thr_sing = pca_plot(matrix_sinlge, title=f"PCA - Seed Experiment\nSingle-labelled\n{eval_set}")
-        pca_one_two_m_only, pca_one_thr_m_only, pca_two_thr_m_only, pca_one_two_thr_m_only = pca_plot(matrix_multi_label_only, title=f"PCA - Seed Experiment\nMulti-labelled\n{eval_set}")
-        pca_one_two_all, pca_one_thr_all, pca_two_thr_all, pca_one_two_thr_all = pca_plot(matrix_multi_label_all, title=f"PCA - Seed Experiment\nSingle-labelled & Multi-labelled\n{eval_set}")
+        one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing = tsne_plot(matrix_sinlge, title=f"t-SNE - Seed Experiment\nSingle-labelled\n{eval_title}")
+        one_two_m_only, one_thr_m_only, two_thr_m_only, one_two_thr_m_only = tsne_plot(matrix_multi_label_only, title=f"t-SNE - Seed Experiment\nMulti-labelled\n{eval_title}")
+        one_two_all, one_thr_all, two_thr_all, one_two_thr_all = tsne_plot(matrix_multi_label_all, title=f"t-SNE - Seed Experiment\nSingle-labelled & Multi-labelled\n{eval_title}")
+
+        pca_one_two_sing, pca_one_thr_sing, pca_two_thr_sing, pca_one_two_thr_sing = pca_plot(matrix_sinlge, title=f"PCA - Seed Experiment\nSingle-labelled\n{eval_title}")
+        pca_one_two_m_only, pca_one_thr_m_only, pca_two_thr_m_only, pca_one_two_thr_m_only = pca_plot(matrix_multi_label_only, title=f"PCA - Seed Experiment\nMulti-labelled\n{eval_title}")
+        pca_one_two_all, pca_one_thr_all, pca_two_thr_all, pca_one_two_thr_all = pca_plot(matrix_multi_label_all, title=f"PCA - Seed Experiment\nSingle-labelled & Multi-labelled\n{eval_title}")
 
         if tsne_save: 
             save_plot(one_two_sing, one_thr_sing, two_thr_sing, one_two_thr_sing, f"{eval_set}_single_label_only", plot_type="plots_tsne")
