@@ -183,7 +183,7 @@ def run(**task_args):
             
             title = labels[0].split("=")[0][:-1] 
 
-            f1_plt = plot_f1(f1_scores[experiment_tag], labels, title)
+            f1_plt = plot_f1(f1_scores[experiment_tag], labels, title=f"F1-score development set\n{title}")
             
             if not os.path.exists(f"{output_dir}/plots_f1_train"):
                 os.makedirs(f"{output_dir}/plots_f1_train")
