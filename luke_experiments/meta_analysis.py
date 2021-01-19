@@ -39,6 +39,7 @@ dpi = 300
 @click.option("--output-dir", default="luke_experiments/plots_meta_analysis")
 @click.option("--name-changing-file", default="luke_experiments/function_meta_analysis/name_change.json")
 @click.option("--tensorboard-plot/--no-tensorboard-plot", default=True)
+@click.option("--f1-training-plot/--no-f1-training-plot", default=True)
 @click.option("--scatter-plot/--no-scatter-plot", default=True)
 @click.option("--calibration-plot/--no-calibration-plot", default=True)
 def run(**task_args):
@@ -48,6 +49,7 @@ def run(**task_args):
     output_dir = args.output_dir
     names_dict_dir = args.name_changing_file
     tensorboard_plot =  args.tensorboard_plot
+    f1_training_plot =  args.f1_training_plot
     scatter_plot = args.scatter_plot
     calibration_plot = args.calibration_plot
 
@@ -61,17 +63,20 @@ def run(**task_args):
     experiment_tags = config.tags
 
     eval_results = {}
-    eval_results_with_tag = {}
     pred_logts = {}
+    f1_scores = {}
+
+    eval_results_with_tag = {}
 
     for experiment_tag in experiment_tags:
         eval_results[experiment_tag] = {}
+        pred_logts[experiment_tag] = {}
+        f1_scores[experiment_tag] = {}
 
         f1_eval = torch.tensor([])
         precision_eval = torch.tensor([])
         recall_eval = torch.tensor([])
         
-        pred_logts[experiment_tag] = {}
         
         for root, dirs, files in os.walk(data_dir):
 
@@ -122,9 +127,12 @@ def run(**task_args):
                 test_recall_eval    = torch.tensor([data[z] for z in data if "test_recall" in z])
 
 
+                # Data for F1 during training: 
+                f1_scores[experiment_tag][base_root] = {}
+                f1_scores[experiment_tag][base_root] = [data[z] for z in data if "dev_f1_epoch" in z]
+
                 # Data for Scatter Plot: 
                 eval_results[experiment_tag][base_root] = {}
-
                 eval_results[experiment_tag][base_root]["f1"] = [dev_f1_eval, test_f1_eval]
                 eval_results[experiment_tag][base_root]["precision"] = [dev_precision_eval, test_precision_eval]
                 eval_results[experiment_tag][base_root]["recall"] = [dev_recall_eval, test_recall_eval]
@@ -164,6 +172,26 @@ def run(**task_args):
         # Evaluation: Experimental based
         ######################################################
         
+        # F1 - scores during training
+        if eval_results[experiment_tag] and f1_training_plot:
+
+            f1_scores[experiment_tag] = name_changes(f1_scores[experiment_tag], names_dict)
+
+            labels = sorted(f1_scores[experiment_tag])
+            if "a." in labels[0]:
+                labels = [label[2:] for label in labels]
+            
+            title = labels[0].split("=")[0][:-1] 
+
+            f1_plt = plot_f1(f1_scores[experiment_tag], labels, title=f"F1-score development set\n{title}")
+            
+            if not os.path.exists(f"{output_dir}/plots_f1_train"):
+                os.makedirs(f"{output_dir}/plots_f1_train")
+                
+            f1_plt.savefig(f"{output_dir}/plots_f1_train/f1_train_{experiment_tag}", dpi=dpi)            
+
+
+
         # Scatter plot for dev and test:
         if eval_results[experiment_tag] and scatter_plot: 
             f1_eval, recall_eval, precision_eval = [], [], []   # experiment_tag = "learning_rate"
@@ -187,17 +215,17 @@ def run(**task_args):
 
             scatter_plt = plot_scatter(eval_results_with_tag[experiment_tag], labels, title=title)
 
-            if not os.path.exists(f"{output_dir}/scatter_plots"):
-                os.makedirs(f"{output_dir}/scatter_plots")
+            if not os.path.exists(f"{output_dir}/plots_scatter"):
+                os.makedirs(f"{output_dir}/plots_scatter")
                 
-            scatter_plt.savefig(f"{output_dir}/scatter_plots/dev_test_{experiment_tag}", dpi=dpi)
+            scatter_plt.savefig(f"{output_dir}/plots_scatter/dev_test_{experiment_tag}", dpi=dpi)
         
 
         # Calibration Plot for dev and test seperately: 
         if pred_logts[experiment_tag] and calibration_plot: 
             
-            if not os.path.exists(f"{output_dir}/calibration_plots"):
-                os.makedirs(f"{output_dir}/calibration_plots")
+            if not os.path.exists(f"{output_dir}/plots_calibration"):
+                os.makedirs(f"{output_dir}/plots_calibration")
 
             for eval_set in config.eval_sets:
         
@@ -235,7 +263,7 @@ def run(**task_args):
                     labels = [label[7:] for label in labels]
                 cal_plot = plot_calibration_curve_with_hist(true, pred, model_name=labels, title=title, n_bins=10)
 
-                cal_plot.savefig(f"{output_dir}/calibration_plots/{experiment_tag}_{eval_set}", dpi=dpi)
+                cal_plot.savefig(f"{output_dir}/plots_calibration/{experiment_tag}_{eval_set}", dpi=dpi)
                 
 
 # ==============================================================================
