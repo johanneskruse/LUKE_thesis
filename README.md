@@ -1,8 +1,12 @@
-<img src="resources/luke_logo.png" width="200" alt="LUKE">
+# Credit
 
-[![CircleCI](https://circleci.com/gh/studio-ousia/luke.svg?style=svg&circle-token=49524bfde04659b8b54509f7e0f06ec3cf38f15e)](https://circleci.com/gh/studio-ousia/luke)
+As part of my thesis we will do a comprehensive investigation of the LUKE model. Majority of the code originates from the GitHub repo: https://github.com/studio-ousia/luke. The work is done by Ikuya Yamada and his team.
 
----
+If you are intersted in the original work, please find article [original paper](https://arxiv.org/abs/2010.01057) and citation:
+
+Note, as I am still working on my thesis this repo may be subject to change. 
+
+# Getting Started 
 
 **LUKE** (**L**anguage **U**nderstanding with **K**nowledge-based
 **E**mbeddings) is a new pre-trained contextualized representation of words and
@@ -42,8 +46,11 @@ These numbers are reported in
 LUKE can be installed using [Poetry](https://python-poetry.org/):
 
 ```bash
-poetry install
+$ poetry install
 ```
+
+The virtual environment automatically created by Poetry can be activated by
+`poetry shell`.
 
 ## Released Models
 
@@ -63,95 +70,221 @@ server with a single or eight NVidia V100 GPUs. We used
 APEX library which can be installed as follows:
 
 ```bash
-git clone https://github.com/NVIDIA/apex.git
-cd apex
-git checkout c3fad1ad120b23055f6630da0b029c8b626db78f
-pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" .
+$ git clone https://github.com/NVIDIA/apex.git
+$ cd apex
+$ git checkout c3fad1ad120b23055f6630da0b029c8b626db78f
+$ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" .
 ```
 
-The commands that reproduce the experimental results are provided as follows.
+The APEX library is not needed if you do not use `--fp16` option or reproduce
+the results based on the trained checkpoint files.
 
-**Entity Typing on Open Entity Dataset:**
+The commands that reproduce the experimental results are provided as follows:
 
-The Open Entity dataset used in our experiments can be downloaded from
-[here](https://github.com/thunlp/ERNIE). It consists of training, development,
-and test sets, where each set contains 1,998 examples with labels of nine
-general entity types.
+### Entity Typing on Open Entity Dataset
+
+**Dataset:** [Link](https://github.com/thunlp/ERNIE)\
+**Checkpoint file (compressed):** [Link](https://drive.google.com/file/d/10F6tzx0oPG4g-PeB0O1dqpuYtfiHblZU/view?usp=sharing)
+
+**Using the checkpoint file:**
 
 ```bash
-python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> entity-typing run --data-dir=<DATA_DIR> --fp16 --train-batch-size=2 --gradient-accumulation-steps=2 --learning-rate=1e-5 --num-train-epochs=3
+$ python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    entity-typing run \
+    --data-dir=<DATA_DIR> \
+    --checkpoint-file=<CHECKPOINT_FILE> \
+    --no-train
 ```
 
-**Relation Classification on TACRED Dataset:**
-
-The TACRED dataset can be obtained from the
-[official website](https://nlp.stanford.edu/projects/tacred/). It contains
-68,124 training examples, 22,631 development examples, and 15,509 test examples
-with labels of their relation types.
+**Fine-tuning the model:**
 
 ```bash
-python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> relation-classification run --data-dir=<DATA_DIR> --fp16 --train-batch-size=4 --gradient-accumulation-steps=8 --learning-rate=1e-5 --num-train-epochs=5
+$ python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    entity-typing run \
+    --data-dir=<DATA_DIR> \
+    --train-batch-size=2 \
+    --gradient-accumulation-steps=2 \
+    --learning-rate=1e-5 \
+    --num-train-epochs=3 \
+    --fp16
 ```
 
-**Named Entity Recognition on CoNLL-2003 Dataset:**
+### Relation Classification on TACRED Dataset
 
-The CoNLL-2003 dataset can be downloaded from
-[its website](https://www.clips.uantwerpen.be/conll2003/ner/). It comprises
-training, development, and test sets, containing 14,987, 3,466, and 3,684
-sentences, respectively.
+**Dataset:** [Link](https://nlp.stanford.edu/projects/tacred/)\
+**Checkpoint file (compressed):** [Link](https://drive.google.com/file/d/10XSaQRtQHn13VB_6KALObvok6hdXw7yp/view?usp=sharing)
+
+**Using the checkpoint file:**
 
 ```bash
-python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> ner run --data-dir=<DATA_DIR> --fp16 --train-batch-size=2 --gradient-accumulation-steps=2 --learning-rate=1e-5 --num-train-epochs=5
+$ python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    relation-classification run \
+    --data-dir=<DATA_DIR> \
+    --checkpoint-file=<CHECKPOINT_FILE> \
+    --no-train
 ```
 
-**Cloze-style Question Answering on ReCoRD Dataset:**
-
-The ReCoRD dataset can be obtained from
-[its website](https://sheng-z.github.io/ReCoRD-explorer/). It consists of
-100,730 training, 10,000 development, and 10,000 test questions created based on
-80,121 unique news articles.
+**Fine-tuning the model:**
 
 ```bash
-python -m examples.cli --num-gpus=8 --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> entity-span-qa run --data-dir=<DATA_DIR> --fp16 --train-batch-size=1 --gradient-accumulation-steps=4 --learning-rate=1e-5 --num-train-epochs=2
+$ python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    relation-classification run \
+    --data-dir=<DATA_DIR> \
+    --train-batch-size=4 \
+    --gradient-accumulation-steps=8 \
+    --learning-rate=1e-5 \
+    --num-train-epochs=5 \
+    --fp16
 ```
 
-**Extractive Question Answering on SQuAD 1.1 Dataset:**
+### Named Entity Recognition on CoNLL-2003 Dataset
 
-The SQuAD 1.1 dataset can be downloaded from
-[its website](https://rajpurkar.github.io/SQuAD-explorer/). It contains 87,599
-training, 10,570 development, and 9,533 test questions created based on 536
-Wikipedia articles.
+**Dataset:** [Link](https://www.clips.uantwerpen.be/conll2003/ner/)\
+**Checkpoint file (compressed):** [Link](https://drive.google.com/file/d/10VFEHXMiJGQvD62QbHa8C8XYSeAIt_CP/view?usp=sharing)
 
-Wikipedia data files specified in the following command (i.e.,
-`enwiki_20160305.pkl`, `enwiki_20181220_redirects.pkl`, and
-`enwiki_20160305_redirects.pkl`) can be downloaded from
-[this link](https://drive.google.com/file/d/129tDJ3ev6IdbJiKOmO6GTgNANunhO_vt/view?usp=sharing).
+**Using the checkpoint file:**
 
 ```bash
-python -m examples.cli --num-gpus=8 --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> reading-comprehension run --data-dir=<DATA_DIR> --wiki-link-db-file=enwiki_20160305.pkl --model-redirects-file=enwiki_20181220_redirects.pkl --link-redirects-file=enwiki_20160305_redirects.pkl --fp16 --no-negative --train-batch-size=2 --gradient-accumulation-steps=3 --learning-rate=15e-6 --num-train-epochs=2
+$ python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    ner run \
+    --data-dir=<DATA_DIR> \
+    --checkpoint-file=<CHECKPOINT_FILE> \
+    --no-train
 ```
 
+**Fine-tuning the model:**
 
-**Tensorboard generation:**
+```bash
+$ python -m examples.cli\
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    ner run \
+    --data-dir=<DATA_DIR> \
+    --train-batch-size=2 \
+    --gradient-accumulation-steps=2 \
+    --learning-rate=1e-5 \
+    --num-train-epochs=5 \
+    --fp16
+```
+
+### Cloze-style Question Answering on ReCoRD Dataset
+
+**Dataset:** [Link](https://sheng-z.github.io/ReCoRD-explorer/)\
+**Checkpoint file (compressed):** [Link](https://drive.google.com/file/d/10LuPIQi-HslZs_BgHxSnitGe2tw_anZp/view?usp=sharing)
+
+**Using the checkpoint file:**
+
+```bash
+$ python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    entity-span-qa run \
+    --data-dir=<DATA_DIR> \
+    --checkpoint-file=<CHECKPOINT_FILE> \
+    --no-train
+```
+
+**Fine-tuning the model:**
+
+```bash
+$ python -m examples.cli \
+    --num-gpus=8 \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    entity-span-qa run \
+    --data-dir=<DATA_DIR> \
+    --train-batch-size=1 \
+    --gradient-accumulation-steps=4 \
+    --learning-rate=1e-5 \
+    --num-train-epochs=2 \
+    --fp16
+```
+
+### Extractive Question Answering on SQuAD 1.1 Dataset
+
+**Dataset:** [Link](https://rajpurkar.github.io/SQuAD-explorer/)\
+**Checkpoint file (compressed):** [Link](https://drive.google.com/file/d/1097QicHAVnroVVw54niPXoY-iylGNi0K/view?usp=sharing)\
+**Wikipedia data files (compressed):**
+[Link](https://drive.google.com/file/d/129tDJ3ev6IdbJiKOmO6GTgNANunhO_vt/view?usp=sharing)
+
+**Using the checkpoint file:**
+
+```bash
+$ python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    reading-comprehension run \
+    --data-dir=<DATA_DIR> \
+    --checkpoint-file=<CHECKPOINT_FILE> \
+    --no-negative \
+    --wiki-link-db-file=enwiki_20160305.pkl \
+    --model-redirects-file=enwiki_20181220_redirects.pkl \
+    --link-redirects-file=enwiki_20160305_redirects.pkl \
+    --no-train
+```
+
+**Fine-tuning the model:**
+
+```bash
+$ python -m examples.cli \
+    --num-gpus=8 \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    reading-comprehension run \
+    --data-dir=<DATA_DIR> \
+    --no-negative \
+    --wiki-link-db-file=enwiki_20160305.pkl \
+    --model-redirects-file=enwiki_20181220_redirects.pkl \
+    --link-redirects-file=enwiki_20160305_redirects.pkl \
+    --train-batch-size=2 \
+    --gradient-accumulation-steps=3 \
+    --learning-rate=15e-6 \
+    --num-train-epochs=2 \
+    --fp16
+```
+
+# Analysis
+This has been added to the original work. 
+
+## Confusion matrix: 
+To quantify the performance of a single model using confusion matrices:
+```
+python luke_experiments.confusion_matrix --data-dir=<DATA_DIR> --cm-output-dir=<OUTPUT_DIR>
+```
+
+## **Plotting meta-analysis for different experimental settings:**
+We have perform multiple experiments with different hyperparameter setting for LUKE, e.g. *learning rate*, *dropout*, and *batch size*.
+
+You will have to manually adjust the experimental tags of which the experimentent  ("learning_rate"). Open the luke_experiments.meta_analysis.py and modify:
+``` 
+tags = ["NAME_OF_PARAMETER_1", "NAME_OF_PARAMETER_2"]
+```
 
 To generate the event files for Tensorboard run: 
-```bash
+```
 python -m luke_experiments.meta_analysis --data-dir [path/to/experiment_output]
 ```
 
 Here data-dir is the path to the experiments that contain all folders with experiments. Thus, in an experiment multiple experiment folder exists, where each of them contain a result.json file ([robust_seed_1, robust_seed_2, robust_seed_3, etc.)
-
-You will have to manually adjust the experimental tags of which the experimentent  ("learning_rate")
 
 The output-dir is default: 'luke_experiments' (the same as the scripts). Note, the script also provides scatter and calibration plots for each model output. You can disable a meta-analysis plot (true/false): 
 - "--tensorboard-plot/--no-tensorboard-plot" 
 - "--scatter-plot/--no-scatter-plot"
 - "--calibration-plot/--no-calibration-plot"
 
-
 The default is True.
 
-**Run the Tensorboard:**
+### **Run the Tensorboard:**
 
 Run tensorboard: 
 
@@ -160,25 +293,3 @@ tensorboard --logdir luke_experiments/plots_meta_analysis/runs_tensorboards
 ```
 
 This is the default output path from ```meta_analysis.py```.
-
-## Citation
-
-If you use LUKE in your work, please cite the
-[original paper](https://arxiv.org/abs/2010.01057):
-
-```
-@inproceedings{yamada2020luke,
-  title={LUKE: Deep Contextualized Entity Representations with Entity-aware Self-attention},
-  author={Ikuya Yamada and Akari Asai and Hiroyuki Shindo and Hideaki Takeda and Yuji Matsumoto},
-  booktitle={EMNLP},
-  year={2020}
-}
-```
-
-## Contact Info
-
-Please submit a GitHub issue or send an e-mail to Ikuya Yamada
-(`ikuya@ousia.jp`) for help or issues using LUKE.
-
-
-
