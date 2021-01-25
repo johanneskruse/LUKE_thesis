@@ -1,6 +1,10 @@
 # System:
-__pycache__
-__pycache__/*
+*.log
+*.pot
+*.pyc
+*/*/*/__pycache__/
+*/*/__pycache__/
+*/__pycache__/
 .DS_Store
 *.pyc
 *.swp
