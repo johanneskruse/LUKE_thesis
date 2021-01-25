@@ -113,7 +113,10 @@ def run(common_args, **task_args):
 
     if args.do_eval:
         model = LukeForEntityTyping(args, num_labels)
-        model.load_state_dict(torch.load(os.path.join(args.output_dir, WEIGHTS_NAME), map_location="cpu"))
+        if args.checkpoint_file:
+            model.load_state_dict(torch.load(args.checkpoint_file, map_location="cpu"))
+        else:
+            model.load_state_dict(torch.load(os.path.join(args.output_dir, WEIGHTS_NAME), map_location="cpu"))
         model.to(args.device)
 
         evaluation_predict_label = {"label_list": label_list, "dev": {}, "test": {}}
