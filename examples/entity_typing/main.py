@@ -55,7 +55,7 @@ def run(common_args, **task_args):
     args.model_config.entity_vocab_size = 2
     args.model_weights["entity_embeddings.entity_embeddings.weight"] = torch.cat([entity_emb[:1], mask_emb])
 
-    train_dataloader, _, features, label_list = load_and_cache_examples(args, fold="train")
+    train_dataloader, _, features, label_list = load_examples(args, fold="train")
     num_labels = len(features[0].labels)
 
     results = {}
@@ -156,7 +156,7 @@ def run(common_args, **task_args):
 
 
 def evaluate(args, model, fold="dev", output_file=None, write_all=False):
-    dataloader, _, features, label_list = load_and_cache_examples(args, fold=fold)
+    dataloader, _, features, label_list = load_examples(args, fold=fold)
     model.eval()
 
     all_logits = []
@@ -309,6 +309,55 @@ def load_and_cache_examples(args, fold="train"):
         else:
             sampler = RandomSampler(features, replacement=False, num_samples=None)
         
+        dataloader = DataLoader(features, sampler=sampler, batch_size=args.train_batch_size, collate_fn=collate_fn)
+
+    return dataloader, examples, features, label_list
+
+
+
+def load_examples(args, fold="train"):
+    if args.local_rank not in (-1, 0) and fold == "train":
+        torch.distributed.barrier()
+
+    processor = DatasetProcessor()
+    if fold == "train":
+        examples = processor.get_train_examples(args.data_dir)
+    elif fold == "dev":
+        examples = processor.get_dev_examples(args.data_dir)
+    else:
+        examples = processor.get_test_examples(args.data_dir)
+
+    label_list = processor.get_label_list(args.data_dir)
+
+    logger.info("Creating features from the dataset...")
+    features = convert_examples_to_features(examples, label_list, args.tokenizer, args.max_mention_length)
+
+    if args.local_rank == 0 and fold == "train":
+        torch.distributed.barrier()
+
+    def collate_fn(batch):
+        def create_padded_sequence(attr_name, padding_value):
+            tensors = [torch.tensor(getattr(o, attr_name), dtype=torch.long) for o in batch]
+            return torch.nn.utils.rnn.pad_sequence(tensors, batch_first=True, padding_value=padding_value)
+
+        return dict(
+            word_ids=create_padded_sequence("word_ids", args.tokenizer.pad_token_id),
+            word_attention_mask=create_padded_sequence("word_attention_mask", 0),
+            word_segment_ids=create_padded_sequence("word_segment_ids", 0),
+            entity_ids=create_padded_sequence("entity_ids", 0),
+            entity_attention_mask=create_padded_sequence("entity_attention_mask", 0),
+            entity_position_ids=create_padded_sequence("entity_position_ids", -1),
+            entity_segment_ids=create_padded_sequence("entity_segment_ids", 0),
+            labels=torch.tensor([o.labels for o in batch], dtype=torch.long),
+        )
+
+    if fold in ("dev", "test"):
+        dataloader = DataLoader(features, batch_size=args.eval_batch_size, shuffle=False, collate_fn=collate_fn)
+    else:
+        if args.local_rank == -1:
+            sampler = RandomSampler(features)
+        else:
+            sampler = DistributedSampler(features)
         dataloader = DataLoader(features, sampler=sampler, batch_size=args.train_batch_size, collate_fn=collate_fn)
 
     return dataloader, examples, features, label_list
