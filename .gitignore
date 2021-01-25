@@ -5,6 +5,7 @@ __pycache__/*
 *.pyc
 *.swp
 main.cpython-36.pyc
+*.gz
 
 # Data: 
 data
@@ -29,3 +30,6 @@ plots_*
 
 # Confusion matrix:
 confusion_matrix/
+
+# Scripts: 
+plot_gradient_descent.py
