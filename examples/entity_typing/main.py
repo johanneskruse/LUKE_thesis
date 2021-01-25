@@ -113,12 +113,12 @@ def run(common_args, **task_args):
 
     if args.do_eval:
         model = LukeForEntityTyping(args, num_labels)
+        model.load_state_dict(torch.load(args.checkpoint_file, map_location="cpu"))
         if args.checkpoint_file:
             model.load_state_dict(torch.load(args.checkpoint_file, map_location="cpu"))
         else:
             model.load_state_dict(torch.load(os.path.join(args.output_dir, WEIGHTS_NAME), map_location="cpu"))
         model.to(args.device)
-
         evaluation_predict_label = {"label_list": label_list, "dev": {}, "test": {}}
 
         for eval_set in ("dev", "test"):
@@ -127,35 +127,40 @@ def run(common_args, **task_args):
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
             dataset_size[f"{eval_set}_samples"] = sample_size
 
+    if args.do_train:
+        # Print results: 
+        logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
+        
+        # Removing model bin: 
+        if not args.save_model: 
+            os.remove(os.path.join(args.output_dir, "pytorch_model.bin"))
+            logger.info("Removing pytorch_model.bin")
+        
+        # Adding training losses and experimental configurations information: 
+        results["experimental_configurations"] = {
+                                                "log_parameters": {p.name: getattr(args, p.name) for p in run.params}, 
+                                                "model_config": vars(args.model_config)
+                                                }
+        results["experimental_configurations"]["log_parameters"]["global_step"]     = global_step
+        results["experimental_configurations"]["log_parameters"]["average_loss"]    = average_loss
+        results["experimental_configurations"]["log_parameters"]["output_dir"]      = args.output_dir
+        results["experimental_configurations"]["log_parameters"].update(dataset_size)
+        if args.train_frac_size > 1.0: 
+            results["experimental_configurations"]["log_parameters"]["train_constructed"] = "with_replacement"
+        else:
+            results["experimental_configurations"]["log_parameters"]["train_constructed"] = "without_replacement"
+        results["evaluation_predict_label"] = evaluation_predict_label
+        results["training_loss"] = training_loss
 
-    # Print results: 
-    logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
-    
-    # Removing model bin: 
-    if not args.save_model: 
-        os.remove(os.path.join(args.output_dir, "pytorch_model.bin"))
-        logger.info("Removing pytorch_model.bin")
-    
-    # Adding training losses and experimental configurations information: 
-    results["experimental_configurations"] = {
-                                            "log_parameters": {p.name: getattr(args, p.name) for p in run.params}, 
-                                            "model_config": vars(args.model_config)
-                                            }
-    results["experimental_configurations"]["log_parameters"]["global_step"]     = global_step
-    results["experimental_configurations"]["log_parameters"]["average_loss"]    = average_loss
-    results["experimental_configurations"]["log_parameters"]["output_dir"]      = args.output_dir
-    results["experimental_configurations"]["log_parameters"].update(dataset_size)
-    if args.train_frac_size > 1.0: 
-        results["experimental_configurations"]["log_parameters"]["train_constructed"] = "with_replacement"
-    else:
-        results["experimental_configurations"]["log_parameters"]["train_constructed"] = "without_replacement"
-    results["evaluation_predict_label"] = evaluation_predict_label
-    results["training_loss"] = training_loss
-
-    # Save and output final json file with all information: 
-    args.experiment.log_metrics(results)
-    with open(os.path.join(args.output_dir, "results.json"), "w") as f:
-        json.dump(results, f)
+        # Save and output final json file with all information: 
+        args.experiment.log_metrics(results)
+        with open(os.path.join(args.output_dir, "results.json"), "w") as f:
+            json.dump(results, f)
+    else: 
+        logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
+        args.experiment.log_metrics(results)
+        with open(os.path.join(args.output_dir, "results.json"), "w") as f:
+            json.dump(results, f)
 
     return results
 

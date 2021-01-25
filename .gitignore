@@ -9,8 +9,6 @@
 *.swp
 *.gz
 
-
-
 # Data: 
 data
 luke_large_500k.tar.gz
@@ -24,6 +22,8 @@ output/*/
 output*
 *.out 
 *.err
+*.bin
+*.json*
 
 # Plots:
 scatter_plots

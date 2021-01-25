@@ -2,7 +2,7 @@
 
 As part of my thesis we will do a comprehensive investigation of the LUKE model. Majority of the code originates from the GitHub repo: https://github.com/studio-ousia/luke. The work is done by Ikuya Yamada and his team.
 
-If you are intersted in the original work, please find article [original paper](https://arxiv.org/abs/2010.01057) and citation:
+If you are intersted in the original work, please find [original paper](https://arxiv.org/abs/2010.01057).
 
 Note, as I am still working on my thesis this repo may be subject to change. 
 
