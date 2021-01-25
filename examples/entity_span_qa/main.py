@@ -34,6 +34,7 @@ def cli():
 
 
 @cli.command()
+@click.option("--checkpoint-file", type=click.Path(exists=True))
 @click.option("--data-dir", default="data/record", type=click.Path(exists=True))
 @click.option("--doc-stride", default=128)
 @click.option("--max-query-length", default=90)

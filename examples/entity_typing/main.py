@@ -26,6 +26,7 @@ def cli():
     pass
 
 @cli.command()
+@click.option("--checkpoint-file", type=click.Path(exists=True))
 @click.option("--data-dir", default="data/open_entity", type=click.Path(exists=True))
 @click.option("--do-train/--no-train", default=True)
 @click.option("--train-batch-size", default=2)
