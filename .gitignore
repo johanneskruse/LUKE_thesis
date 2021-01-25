@@ -4,8 +4,10 @@ __pycache__/*
 .DS_Store
 *.pyc
 *.swp
-main.cpython-36.pyc
+*.cpython-36*
 *.gz
+
+
 
 # Data: 
 data
