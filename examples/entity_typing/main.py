@@ -113,7 +113,6 @@ def run(common_args, **task_args):
 
     if args.do_eval:
         model = LukeForEntityTyping(args, num_labels)
-        model.load_state_dict(torch.load(args.checkpoint_file, map_location="cpu"))
         if args.checkpoint_file:
             model.load_state_dict(torch.load(args.checkpoint_file, map_location="cpu"))
         else:
