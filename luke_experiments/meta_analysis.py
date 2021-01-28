@@ -21,11 +21,12 @@ class config():
     eval_sets = ["dev", "test"]
 
 
-data_dir = "../data/outputs/seed_lr_batch_frac_weightdecay_dropout"
+data_dir = "../data/outputs/test_lige"
 output_dir = "."
 tensorboard_plot = True
 scatter_plot = True
 calibration_plot = True
+do_evaluate_prior_train = True
 
 dpi = 300    
 
@@ -42,6 +43,7 @@ dpi = 300
 @click.option("--f1-training-plot/--no-f1-training-plot", default=True)
 @click.option("--scatter-plot/--no-scatter-plot", default=True)
 @click.option("--calibration-plot/--no-calibration-plot", default=True)
+@click.option("--do-evaluate-prior-train/--no-evaluate-prior-train", default=True)
 def run(**task_args):
     args = Namespace(**task_args)
 
@@ -52,6 +54,7 @@ def run(**task_args):
     f1_training_plot =  args.f1_training_plot
     scatter_plot = args.scatter_plot
     calibration_plot = args.calibration_plot
+    do_evaluate_prior_train = args.do_evaluate_prior_train
 
     # Dictionary with name changes
     with open(names_dict_dir) as f: 
@@ -173,7 +176,7 @@ def run(**task_args):
         ######################################################
         
         # F1 - scores during training
-        if eval_results[experiment_tag] and f1_training_plot:
+        if f1_scores[experiment_tag] and f1_training_plot:
 
             f1_scores[experiment_tag] = name_changes(f1_scores[experiment_tag], names_dict)
 
@@ -183,14 +186,12 @@ def run(**task_args):
             
             title = labels[0].split("=")[0][:-1] 
 
-            f1_plt = plot_f1(f1_scores[experiment_tag], labels, title=f"F1-score development set\n{title}")
-            
+            f1_plt = plot_f1(f1_scores[experiment_tag], labels, title=f"F1-score development set\n{title}", eval_prior_train=do_evaluate_prior_train)
+
             if not os.path.exists(f"{output_dir}/plots_f1_train"):
                 os.makedirs(f"{output_dir}/plots_f1_train")
                 
             f1_plt.savefig(f"{output_dir}/plots_f1_train/f1_train_{experiment_tag}", dpi=dpi)            
-
-
 
         # Scatter plot for dev and test:
         if eval_results[experiment_tag] and scatter_plot: 

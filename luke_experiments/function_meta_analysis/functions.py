@@ -23,7 +23,8 @@ def name_changes(dict_org, dict_names):
     return dict_org
 
 
-def plot_f1(f1_scores, labels, title):    
+
+def plot_f1(f1_scores, labels, title, eval_prior_train=False):    
     figure, ax = plt.subplots(figsize=(12,9))
 
     for i, experiment in enumerate(sorted(f1_scores)):
@@ -32,19 +33,26 @@ def plot_f1(f1_scores, labels, title):
     ax.legend(labels, loc='center left', bbox_to_anchor=(1, 0.5), 
                 edgecolor="white", title="Model", fontsize="medium")
 
-    ax.set_xticks(range(0,len(f1_scores[experiment]))) 
-    ax.set_xticklabels(range(1,len(f1_scores[experiment])+1))
-    ax.set_title(title, size="x-large") 
+    if eval_prior_train: 
+        xaxis = [i for i in range(0,len(f1_scores[experiment])+1)]
+        xaxis[0] = '0\n(no train)'
+        ax.set_xticklabels(xaxis)
+        ax.set_xticks(range(0,len(f1_scores[experiment]))) 
+    else:  
+        ax.set_xticks(range(0,len(f1_scores[experiment])))
+        ax.set_xticklabels(range(1,len(f1_scores[experiment])+1))
     
+    ax.set_title(title, size="x-large") 
+
     ax.set_xlabel("Epoch", fontsize="large")
     ax.set_ylabel("F1-score", fontsize="large")
 
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
-    figure.tight_layout(rect=[0, 0.03, 1, 0.95])
-    #plt.tight_layout()
+    plt.tight_layout()
 
+    #figure.tight_layout(rect=[0, 0.03, 1, 0.95])
     return figure
 
 
