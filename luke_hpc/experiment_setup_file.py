@@ -11,6 +11,7 @@ To change parameter: data-dir = data_dir, num-train-epochs = num_train_epochs, e
     @click.option("--eval-batch-size", default=32)
     @click.option("--num-train-epochs", default=3.0)
     @click.option("--seed", default=12)
+    @click.option("--do-evaluate-prior-train/--no-evaluate-prior-train", default=True)
     
     # examples/utils/trainer.py: 
     @click.option("--learning-rate", default=1e-5)
@@ -107,6 +108,7 @@ def experiment(output_dir=".", **kwags):
             f"entity-typing", "run",
             f"--data-dir={data_dir}",
             f"--fp16",
+            f"--do-evaluate-prior-train",
             f"--seed={seed}",
             f"--{saving_model}",
             f"--num-train-epochs={num_train_epochs}",
@@ -128,7 +130,7 @@ output_dir = "data/outputs/seed_lr_batch_frac_weightdecay_dropout_frac_size"
 # experiment(output_dir=output_dir, train_batch_size = [1, 2, 4, 8, 16, 32, 64])                                      # Default: 4 [2 + gradient_accumulation_steps = 2]
 # experiment(output_dir=output_dir, seed = list(range(10,21,1)))                                                      # Default: 12     
 # experiment(output_dir=output_dir, weight_decay = [1e-1, 1e-2, 1e-3, 1e-4])          # Default: 0.01
-experiment(output_dir=output_dir, weight_decay = [1e-0, 1e1, 1e2])          # Default: 0.01
+experiment(output_dir=output_dir, weight_decay = [0, 25, 50, 75])          # Default: 0.01
 # experiment(output_dir=output_dir, hidden_dropout_prob = np.round(np.arange(0.1, 1, 0.1),2))                         # Default: 0.01
 
 

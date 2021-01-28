@@ -35,6 +35,7 @@ def cli():
 @click.option("--num-train-epochs", default=3.0)
 @click.option("--seed", default=12)
 @click.option("--train-batch-size", default=2)
+@click.option("--do-evaluate-prior-train/--no-evaluate-prior-train", default=True)
 @trainer_args
 @click.pass_obj
 def run(common_args, **task_args):
@@ -69,6 +70,10 @@ def run(common_args, **task_args):
         model = LukeForEntityTyping(args, num_labels)
         model.load_state_dict(args.model_weights, strict=False)
         model.to(args.device)
+
+        if args.do_evaluate_prior_train:
+            dev_results, _, _ = evaluate(args, model, fold="dev")
+            results.update({f"dev_{k}_epoch_no_training": v for k, v in dev_results.items()})
         
         num_train_steps_per_epoch = len(train_dataloader) // args.gradient_accumulation_steps
         num_train_steps = int(num_train_steps_per_epoch * args.num_train_epochs)
@@ -112,14 +117,16 @@ def run(common_args, **task_args):
     torch.cuda.empty_cache()
 
     if args.do_eval:
+        
+        evaluation_predict_label = {"label_list": label_list, "dev": {}, "test": {}}
+        
         model = LukeForEntityTyping(args, num_labels)
         if args.checkpoint_file:
             model.load_state_dict(torch.load(args.checkpoint_file, map_location="cpu"))
         else:
             model.load_state_dict(torch.load(os.path.join(args.output_dir, WEIGHTS_NAME), map_location="cpu"))
         model.to(args.device)
-        evaluation_predict_label = {"label_list": label_list, "dev": {}, "test": {}}
-
+        
         for eval_set in ("dev", "test"):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
             result_dict, sample_size, evaluation_predict_label[eval_set] = evaluate(args, model, eval_set, output_file)
