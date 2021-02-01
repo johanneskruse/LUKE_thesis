@@ -36,10 +36,10 @@ dpi = 300
 # ==============================================================================
 
 @click.command()
-@click.option("--data-dir", default="data/outputs/seed_lr_batch_frac_weightdecay_dropout", type=click.Path(exists=True))
+@click.option("--data-dir", default="data/outputs/seed_lr_wd_batch_train_size_dropout_with_eval_no_train", type=click.Path(exists=True))
 @click.option("--output-dir", default="luke_experiments/plots_meta_analysis")
 @click.option("--name-changing-file", default="luke_experiments/function_meta_analysis/name_change.json")
-@click.option("--tensorboard-plot/--no-tensorboard-plot", default=True)
+@click.option("--tensorboard-plot/--no-tensorboard-plot", default=False)
 @click.option("--f1-training-plot/--no-f1-training-plot", default=True)
 @click.option("--scatter-plot/--no-scatter-plot", default=True)
 @click.option("--calibration-plot/--no-calibration-plot", default=True)
