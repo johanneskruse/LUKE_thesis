@@ -298,12 +298,21 @@ def load_examples(args, fold="train"):
         )
 
     if fold in ("dev", "test"):
-        dataloader = DataLoader(features, batch_size=args.eval_batch_size, shuffle=False, collate_fn=collate_fn)
+            dataloader = DataLoader(features, batch_size=args.eval_batch_size, shuffle=False, collate_fn=collate_fn)
     else:
         if args.local_rank == -1:
-            sampler = RandomSampler(features)
+            if args.train_frac_size != 1.0: 
+                random.seed(args.seed)
+                if args.train_frac_size > 1: # Make replacement samples: 
+                    logger.info(f"Training set is constructed with replacement")
+                    features = random.choices(features, k = int(args.train_frac_size*len(features)))
+                else: # Decrease samples for training set without replacement: 
+                    logger.info(f"Training set is constructed without replacement")
+                    features = random.sample(features, int(args.train_frac_size*len(features)))
+            sampler = RandomSampler(features, replacement=False, num_samples=None)
         else:
-            sampler = DistributedSampler(features)
+            sampler = RandomSampler(features, replacement=False, num_samples=None)
+        
         dataloader = DataLoader(features, sampler=sampler, batch_size=args.train_batch_size, collate_fn=collate_fn)
 
     return dataloader, examples, features, label_list
