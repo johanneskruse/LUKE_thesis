@@ -93,7 +93,8 @@ def experiment(output_dir=".", **kwags):
         #     loop_item_str = str(loop_item).replace(".", "_")
         #     temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item_str}")
         # else:
-        #     temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
+        
+        temp_output_dir = os.path.join(output_dir, f"robust_{experiment_tag}_{loop_item}")
         
         if os.path.exists(temp_output_dir): 
             continue 
