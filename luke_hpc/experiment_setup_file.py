@@ -86,7 +86,7 @@ def experiment(output_dir=".", **kwags):
             train_frac_size = loop_item
         if experiment_tag == "weight_decay":
             weight_decay = loop_item
-        if experiment_tag == "hidden_dropout_probs":
+        if experiment_tag == "hidden_dropout_prob":
             hidden_dropout_prob = loop_item
 
         # if type(loop_item) is np.float64:
@@ -126,12 +126,12 @@ def experiment(output_dir=".", **kwags):
 
 
 output_dir = "data/outputs/seed_lr_wd_batch_train_size_dropout_with_eval_no_train_t"
-experiment(output_dir=output_dir, seed = list(range(10,21,1)))                                                      # Default: 12     
-experiment(output_dir=output_dir, learning_rate = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10])    # Default: 1e-5  
-experiment(output_dir=output_dir, weight_decay = [1000, 100, 75, 50, 25, 0, 1e-1, 1e-2, 1e-3, 1e-4])          # Default: 0.01
-#experiment(output_dir=output_dir, train_batch_size = [1, 2, 4, 8, 16, 32, 64])                                      # Default: 4 [2 + gradient_accumulation_steps = 2]
-#experiment(output_dir=output_dir, train_batch_size = [1]) # set gradient_accumulation_steps = 1
-experiment(output_dir=output_dir, train_frac_size = [0.002, 0.003, 0.004, 0.005, 0.01, 0.05, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0])       # Default: 1.0
+# experiment(output_dir=output_dir, seed = list(range(10,21,1)))                                                      # Default: 12     
+# experiment(output_dir=output_dir, learning_rate = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10])    # Default: 1e-5  
+# experiment(output_dir=output_dir, weight_decay = [1000, 100, 75, 50, 25, 0, 1e-1, 1e-2, 1e-3, 1e-4])          # Default: 0.01
+# experiment(output_dir=output_dir, train_batch_size = [1, 2, 4, 8, 16, 32, 64])                                      # Default: 4 [2 + gradient_accumulation_steps = 2]
+# experiment(output_dir=output_dir, train_batch_size = [1]) # set gradient_accumulation_steps = 1
+# experiment(output_dir=output_dir, train_frac_size = [0.002, 0.003, 0.004, 0.005, 0.01, 0.05, 0.1, 0.2, 0.4, 0.6, 0.8, 1.0])       # Default: 1.0
 experiment(output_dir=output_dir, hidden_dropout_prob = np.round(np.arange(0, 1, 0.1),2))                         # Default: 0.01
 
 

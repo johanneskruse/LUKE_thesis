@@ -21,7 +21,7 @@ class config():
     eval_sets = ["dev", "test"]
 
 
-data_dir = "../data/outputs/test_lige"
+data_dir = "../data/outputs/seed_lr_wd_batch_train_size_dropout_with_eval_no_train"
 output_dir = "."
 tensorboard_plot = True
 scatter_plot = True
