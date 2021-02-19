@@ -24,6 +24,7 @@ output*
 *.err
 *.bin
 *.json*
+missclassified_missing_labels*
 
 # Plots:
 scatter_plots

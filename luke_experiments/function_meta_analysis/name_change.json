@@ -1,4 +1,5 @@
 {
+    "robust_hidden_dropout_prob_0.0" : "Dropout prob = 0.0",
     "robust_hidden_dropout_prob_0.1" : "Dropout prob = 0.1",
     "robust_hidden_dropout_prob_0.2" : "Dropout prob = 0.2",
     "robust_hidden_dropout_prob_0.3" : "Dropout prob = 0.3",
