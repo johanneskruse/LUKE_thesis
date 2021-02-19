@@ -297,6 +297,7 @@ class EntityAwareSelfAttention(nn.Module):
 
         # outputs = (context_layer, attention_probs) if self.output_attentions else (context_layer,)
         outputs = (context_layer[:, :word_size, :], context_layer[:, word_size:, :])
+        
 
         return outputs # context_layer[:, :word_size, :], context_layer[:, word_size:, :]
 
