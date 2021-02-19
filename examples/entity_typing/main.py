@@ -164,6 +164,7 @@ def run(common_args, **task_args):
             json.dump(results, f)
     else: 
         logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
+        results["evaluation_predict_label"] = evaluation_predict_label
         args.experiment.log_metrics(results)
         with open(os.path.join(args.output_dir, "results.json"), "w") as f:
             json.dump(results, f)
