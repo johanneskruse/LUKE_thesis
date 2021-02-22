@@ -4,6 +4,7 @@ import os
 import uuid
 from .util import format_special_chars, format_attention
 
+
 def model_view(attention, tokens, sentence_b_start=None, prettify_tokens=True, display_mode='dark', format_data=True):
     """Render model view
 

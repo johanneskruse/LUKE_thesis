@@ -25,14 +25,18 @@ def drop_down(options, value=None, description='Select:', disabled=False):
     )
     return widget
 
+
+def print_sentence(sent_a, sent_b=None):
+    if sent_b is None:
+        return print(f"Sentence: {sent_a}")
+    else:
+        print(f"Sentence: {sent_a}\nSentence b: {sent_b}")
+    return 
+
+
 def sentence_index(luke_data, sentence_selected):
     index = []
     for i, example in enumerate(luke_data): 
         if sentence_selected == luke_data[example]["sentence"]:
             index = i
     return index
-
-def print_sentence(sent_a, sent_b=None):
-    print(f"Sentence: {sent_a}")
-    if sent_b:
-        print(f"Sentence b: {sent_b}")

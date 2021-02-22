@@ -25,6 +25,7 @@ output/*/
 *.bin
 *.json*
 missclassified_missing_labels*
+*.ipynb_checkpoints/*
 
 # Plots:
 scatter_plots
