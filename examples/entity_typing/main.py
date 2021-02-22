@@ -19,6 +19,8 @@ from .utils import ENTITY_TOKEN, convert_examples_to_features, DatasetProcessor
 import numpy as np
 import random
 
+import pickle
+
 logger = logging.getLogger(__name__)
 
 @click.group(name="entity-typing")
@@ -36,6 +38,7 @@ def cli():
 @click.option("--seed", default=12)
 @click.option("--train-batch-size", default=2)
 @click.option("--do-evaluate-prior-train/--no-evaluate-prior-train", default=True)
+@click.option("--output-attentions/--no-output-attentions", default=True)
 @trainer_args
 @click.pass_obj
 def run(common_args, **task_args):
@@ -44,7 +47,8 @@ def run(common_args, **task_args):
 
     set_seed(args.seed)
 
-    args.model_config.hidden_dropout_prob = args.hidden_dropout_prob
+    args.model_config.output_attentions = args.output_attentions
+    #args.model_config.hidden_dropout_prob = args.hidden_dropout_prob
 
     args.experiment.log_parameters({p.name: getattr(args, p.name) for p in run.params})
     args.model_config.vocab_size += 1
@@ -58,7 +62,7 @@ def run(common_args, **task_args):
     args.model_config.entity_vocab_size = 2
     args.model_weights["entity_embeddings.entity_embeddings.weight"] = torch.cat([entity_emb[:1], mask_emb])
 
-    train_dataloader, _, features, label_list = load_examples(args, fold="train")
+    train_dataloader, _, features, label_list, tokens = load_examples(args, fold="train")
     num_labels = len(features[0].labels)
 
     results = {}
@@ -72,7 +76,7 @@ def run(common_args, **task_args):
         model.to(args.device)
 
         if args.do_evaluate_prior_train:
-            dev_results, _, _ = evaluate(args, model, fold="dev")
+            dev_results, _, _, _ = evaluate(args, model, fold="dev")
             results.update({f"dev_{k}_epoch_no_training": v for k, v in dev_results.items()})
         
         num_train_steps_per_epoch = len(train_dataloader) // args.gradient_accumulation_steps
@@ -84,7 +88,7 @@ def run(common_args, **task_args):
         def step_callback(model, global_step):
             if global_step % num_train_steps_per_epoch == 0 and args.local_rank in (0, -1):
                 epoch = int(global_step / num_train_steps_per_epoch - 1)
-                dev_results, _, _ = evaluate(args, model, fold="dev")
+                dev_results, _, _, _ = evaluate(args, model, fold="dev")
                 args.experiment.log_metrics({f"dev_{k}_epoch{epoch}": v for k, v in dev_results.items()}, epoch=epoch)
                 results.update({f"dev_{k}_epoch{epoch}": v for k, v in dev_results.items()})
                 tqdm.write("dev: " + str(dev_results))
@@ -119,6 +123,7 @@ def run(common_args, **task_args):
     if args.do_eval:
         
         evaluation_predict_label = {"label_list": label_list, "dev": {}, "test": {}}
+        output_attentions_format = {"dev": {}, "test": {}}
         
         model = LukeForEntityTyping(args, num_labels)
         if args.checkpoint_file:
@@ -129,7 +134,7 @@ def run(common_args, **task_args):
         
         for eval_set in ("dev", "test"):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
-            result_dict, sample_size, evaluation_predict_label[eval_set] = evaluate(args, model, eval_set, output_file)
+            result_dict, sample_size, evaluation_predict_label[eval_set], _ = evaluate(args, model, eval_set, output_file) # output_attentions_format[eval_set]
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
             dataset_size[f"{eval_set}_samples"] = sample_size
 
@@ -164,6 +169,12 @@ def run(common_args, **task_args):
             json.dump(results, f)
     else: 
         logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
+        results["experimental_configurations"] = {
+                                                "log_parameters": {p.name: getattr(args, p.name) for p in run.params}, 
+                                                "model_config": vars(args.model_config)
+                                                }
+        results["output_attentions_format"] = output_attentions_format
+        results["evaluation_predict_label"] = evaluation_predict_label
         args.experiment.log_metrics(results)
         with open(os.path.join(args.output_dir, "results.json"), "w") as f:
             json.dump(results, f)
@@ -172,21 +183,85 @@ def run(common_args, **task_args):
 
 
 def evaluate(args, model, fold="dev", output_file=None, write_all=False):
-    dataloader, _, features, label_list = load_examples(args, fold=fold)
+    
+    
+    def format_attention(attention):
+        squeezed = []
+        for layer_attention in attention:
+            # layer_attention x num_heads x seq_len x seq_len
+            if len(layer_attention.shape) != 4:
+                raise ValueError("The attention tensor does not have the correct number of dimensions. Make sure you set "
+                                "output_attentions=True when initializing your model.")
+            squeezed.append(layer_attention.squeeze(0))
+        # num_layers x num_heads x seq_len x seq_len
+        return torch.stack(squeezed)
+        
+    dataloader, _, features, label_list, tokens = load_examples(args, fold=fold)
     model.eval()
 
     all_logits = []
     all_labels = []
-    for batch in tqdm(dataloader, desc=fold):
+    output_attentions_format = {}
+    
+    for i, batch in enumerate(tqdm(dataloader, desc=fold)):
         inputs = {k: v.to(args.device) for k, v in batch.items() if k != "labels"}
-        with torch.no_grad():
-            logits = model(**inputs)
+
+        if args.model_config.output_attentions: 
+            with torch.no_grad():
+                logits, attention_probs = model(**inputs)
+                attention = format_attention(attention_probs)
+        else:
+            with torch.no_grad():
+                logits = model(**inputs)
+                attention_probs = None
+        
+
+        # logger.info(f"attention_probs: {attention_probs[0].shape}")
+        # logger.info(f"attention format: {attention[0].shape}")
+
+        output_attentions_format[f"sent_{i}"] = {}
+        
+
+        tokens[i].extend(["[MASK]", "[PAD]"]) # adding entity [1, 0] on to the the word_ids 
+        output_attentions_format[f"sent_{i}"]["tokens"] = tokens[i] 
+        output_attentions_format[f"sent_{i}"]["attention"] = attention.detach().cpu()
+
+        # logger.info(f"output_attentions_format: {output_attentions_format}")
+        
+
+        if i > 1:
+            continue
+
+        # print("\n\n")
+        # logger.info(f"Tokens: {tokens[i]}")
+        # logger.info(f"Tokens len: {len(tokens[i])}")
+        # logger.info(f"word_ids: {inputs['word_ids']}")
+        # logger.info(f"word_ids shape: {inputs['word_ids'].shape}")
+        # logger.info(f"Attention shape: {attention_probs[0].shape}")
+        # logger.info(f"Inputs: {inputs}")
+        # print("\n\n")
+
+        #logger.info(f"inputs: {inputs}")
+        #logger.info(f"batch: {batch}")
+        
+        #logger.info(len(attention_probs))
+
+        # if i > 3:
+        #     break
+
+        # attention_probs : layers x head x seq_len x seq_len
 
         logits = logits.detach().cpu().tolist()
         labels = batch["labels"].to("cpu").tolist()
 
         all_logits.extend(logits)
         all_labels.extend(labels)
+
+    pickle.dump(output_attentions_format, open( "output_attentions.p", "wb"))
+
+    # logger.info(f"output_attentions_format: {output_attentions_format['sent_1']['tokens']}")
+    # logger.info(f"output_attentions_format: {len(output_attentions_format['sent_1']['tokens'])}")
+    # logger.info(f"output_attentions_format: {output_attentions_format['sent_1']['attention'][0].shape}")
 
     all_predicted_indexes = []
     all_label_indexes = []
@@ -258,7 +333,7 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
     evaluation_predict_label = {"predict_logits": all_logits, 
                             "true_labels": all_labels}
 
-    return dict(precision=precision, recall=recall, f1=f1), len(all_labels), evaluation_predict_label
+    return dict(precision=precision, recall=recall, f1=f1), len(all_labels), evaluation_predict_label, output_attentions_format
 
 
 def load_examples(args, fold="train"):
@@ -276,7 +351,7 @@ def load_examples(args, fold="train"):
     label_list = processor.get_label_list(args.data_dir)
 
     logger.info("Creating features from the dataset...")
-    features = convert_examples_to_features(examples, label_list, args.tokenizer, args.max_mention_length)
+    features, tokens = convert_examples_to_features(examples, label_list, args.tokenizer, args.max_mention_length)
 
     if args.local_rank == 0 and fold == "train":
         torch.distributed.barrier()
@@ -315,4 +390,4 @@ def load_examples(args, fold="train"):
         
         dataloader = DataLoader(features, sampler=sampler, batch_size=args.train_batch_size, collate_fn=collate_fn)
 
-    return dataloader, examples, features, label_list
+    return dataloader, examples, features, label_list, tokens

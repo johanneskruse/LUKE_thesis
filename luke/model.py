@@ -210,7 +210,7 @@ class LukeEntityAwareAttentionModel(LukeModel):
         entity_embeddings = self.entity_embeddings(entity_ids, entity_position_ids, entity_segment_ids)
         attention_mask = self._compute_extended_attention_mask(word_attention_mask, entity_attention_mask)
 
-        return self.encoder(word_embeddings, entity_embeddings, attention_mask)
+        return self.encoder(word_embeddings, entity_embeddings, attention_mask) # attention_probs kommer ud her
 
     def load_state_dict(self, state_dict, *args, **kwargs):
         new_state_dict = state_dict.copy()
@@ -252,6 +252,8 @@ class EntityAwareSelfAttention(nn.Module):
 
         self.dropout = nn.Dropout(config.attention_probs_dropout_prob)
 
+        # self.output_attentions = config.output_attentions
+
     def transpose_for_scores(self, x):
         new_x_shape = x.size()[:-1] + (self.num_attention_heads, self.attention_head_size)
         return x.view(*new_x_shape).permute(0, 2, 1, 3)
@@ -271,13 +273,22 @@ class EntityAwareSelfAttention(nn.Module):
         w2e_key_layer = key_layer[:, :, word_size:, :]
         e2e_key_layer = key_layer[:, :, word_size:, :]
 
-        w2w_attention_scores = torch.matmul(w2w_query_layer, w2w_key_layer.transpose(-1, -2))
-        w2e_attention_scores = torch.matmul(w2e_query_layer, w2e_key_layer.transpose(-1, -2))
-        e2w_attention_scores = torch.matmul(e2w_query_layer, e2w_key_layer.transpose(-1, -2))
-        e2e_attention_scores = torch.matmul(e2e_query_layer, e2e_key_layer.transpose(-1, -2))
+        w2w_attention_scores = torch.matmul(w2w_query_layer, w2w_key_layer.transpose(-1, -2))   # [len(seq), len(seq)]
+        w2e_attention_scores = torch.matmul(w2e_query_layer, w2e_key_layer.transpose(-1, -2))   # [len(seq), 2]
+        e2w_attention_scores = torch.matmul(e2w_query_layer, e2w_key_layer.transpose(-1, -2))   # [2, len(seq)]
+        e2e_attention_scores = torch.matmul(e2e_query_layer, e2e_key_layer.transpose(-1, -2))   # [2, 2] ==> [MASK], [PAD] [1,0]
 
         word_attention_scores = torch.cat([w2w_attention_scores, w2e_attention_scores], dim=3)
         entity_attention_scores = torch.cat([e2w_attention_scores, e2e_attention_scores], dim=3)
+
+        # print(f"w2w_attention_scores: {w2w_attention_scores.shape}")
+        # print(f"w2e_attention_scores: {w2e_attention_scores.shape}")
+        # print(f"e2w_attention_scores: {e2w_attention_scores.shape}")
+        # print(f"e2e_attention_scores: {e2e_attention_scores.shape}")
+        
+        # print(f"word_attention_scores: {word_attention_scores.shape}")
+        # print(f"entity_attention_scores: {entity_attention_scores.shape}")
+
         attention_scores = torch.cat([word_attention_scores, entity_attention_scores], dim=2)
 
         attention_scores = attention_scores / math.sqrt(self.attention_head_size)
@@ -294,13 +305,8 @@ class EntityAwareSelfAttention(nn.Module):
         context_layer = context_layer.permute(0, 2, 1, 3).contiguous()
         new_context_layer_shape = context_layer.size()[:-2] + (self.all_head_size,)
         context_layer = context_layer.view(*new_context_layer_shape)
-
-        # outputs = (context_layer, attention_probs) if self.output_attentions else (context_layer,)
-        outputs = (context_layer[:, :word_size, :], context_layer[:, word_size:, :])
         
-
-        return outputs # context_layer[:, :word_size, :], context_layer[:, word_size:, :]
-
+        return context_layer[:, :word_size, :], context_layer[:, word_size:, :], attention_probs
 
 class EntityAwareAttention(nn.Module):
     def __init__(self, config):
@@ -308,12 +314,16 @@ class EntityAwareAttention(nn.Module):
         self.self = EntityAwareSelfAttention(config)
         self.output = BertSelfOutput(config)
 
+        # self.output_attentions = config.output_attentions
+
     def forward(self, word_hidden_states, entity_hidden_states, attention_mask):
-        word_self_output, entity_self_output = self.self(word_hidden_states, entity_hidden_states, attention_mask)
+
+        word_self_output, entity_self_output, attention_probs = self.self(word_hidden_states, entity_hidden_states, attention_mask)
+
         hidden_states = torch.cat([word_hidden_states, entity_hidden_states], dim=1)
         self_output = torch.cat([word_self_output, entity_self_output], dim=1)
         output = self.output(self_output, hidden_states)
-        return output[:, : word_hidden_states.size(1), :], output[:, word_hidden_states.size(1) :, :]
+        return output[:, : word_hidden_states.size(1), :], output[:, word_hidden_states.size(1) :, :], attention_probs
 
 
 class EntityAwareLayer(nn.Module):
@@ -325,14 +335,13 @@ class EntityAwareLayer(nn.Module):
         self.output = BertOutput(config)
 
     def forward(self, word_hidden_states, entity_hidden_states, attention_mask):
-        word_attention_output, entity_attention_output = self.attention(
+        word_attention_output, entity_attention_output, attention_probs = self.attention(
             word_hidden_states, entity_hidden_states, attention_mask
         )
         attention_output = torch.cat([word_attention_output, entity_attention_output], dim=1)
         intermediate_output = self.intermediate(attention_output)
         layer_output = self.output(intermediate_output, attention_output)
-
-        return layer_output[:, : word_hidden_states.size(1), :], layer_output[:, word_hidden_states.size(1) :, :]
+        return layer_output[:, : word_hidden_states.size(1), :], layer_output[:, word_hidden_states.size(1) :, :], attention_probs
 
 
 class EntityAwareEncoder(nn.Module):
@@ -341,8 +350,14 @@ class EntityAwareEncoder(nn.Module):
         self.layer = nn.ModuleList([EntityAwareLayer(config) for _ in range(config.num_hidden_layers)])
 
     def forward(self, word_hidden_states, entity_hidden_states, attention_mask):
-        for layer_module in self.layer:
-            word_hidden_states, entity_hidden_states = layer_module(
+        
+        attention_probs_all = []
+        
+        for i, layer_module in enumerate(self.layer):
+            
+            word_hidden_states, entity_hidden_states, attention_probs = layer_module( # Added attention_probs visualization
                 word_hidden_states, entity_hidden_states, attention_mask
             )
-        return word_hidden_states, entity_hidden_states
+            attention_probs_all.append(attention_probs)
+
+        return word_hidden_states, entity_hidden_states, attention_probs_all
