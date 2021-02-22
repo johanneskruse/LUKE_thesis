@@ -72,6 +72,7 @@ def convert_examples_to_features(examples, label_list, tokenizer, max_mention_le
         ("-RCB-", ")"),
         ("-RSB-", ")"),
     )
+    tokens_all = []
     features = []
     for example in tqdm(examples):
 
@@ -112,6 +113,8 @@ def convert_examples_to_features(examples, label_list, tokenizer, max_mention_le
         for label in example.labels:
             labels[label_map[label]] = 1
 
+        tokens_all.append(tokens)
+
         features.append(
             InputFeatures(
                 word_ids=word_ids,
@@ -125,4 +128,4 @@ def convert_examples_to_features(examples, label_list, tokenizer, max_mention_le
             )
         )
 
-    return features
+    return features, tokens_all

@@ -13,6 +13,7 @@ class LukeForEntityTyping(LukeEntityAwareAttentionModel):
         self.typing = nn.Linear(args.model_config.hidden_size, num_labels)
 
         self.apply(self.init_weights)
+        self.output_attentions = args.model_config.output_attentions
 
     def forward(
         self,
@@ -34,11 +35,18 @@ class LukeForEntityTyping(LukeEntityAwareAttentionModel):
             entity_segment_ids,
             entity_attention_mask,
         )
-
+        
         feature_vector = encoder_outputs[1][:, 0, :]
         feature_vector = self.dropout(feature_vector)
         logits = self.typing(feature_vector)
-        if labels is None:
-            return logits
+        
+        attention_probs = encoder_outputs[-1]
 
-        return (F.binary_cross_entropy_with_logits(logits.view(-1), labels.view(-1).type_as(logits)),)
+        if self.output_attentions is True:    
+            if labels is None:
+                return logits, attention_probs
+            return (F.binary_cross_entropy_with_logits(logits.view(-1), labels.view(-1).type_as(logits)),), attention_probs
+        else: 
+            if labels is None:
+                return logits
+            return (F.binary_cross_entropy_with_logits(logits.view(-1), labels.view(-1).type_as(logits)),)
