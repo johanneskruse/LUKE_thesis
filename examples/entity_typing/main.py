@@ -38,7 +38,7 @@ def cli():
 @click.option("--seed", default=12)
 @click.option("--train-batch-size", default=2)
 @click.option("--do-evaluate-prior-train/--no-evaluate-prior-train", default=True)
-@click.option("--output-attentions/--no-output-attentions", default=True)
+@click.option("--output-attentions/--no-output-attentions", default=False)
 @trainer_args
 @click.pass_obj
 def run(common_args, **task_args):
@@ -48,7 +48,12 @@ def run(common_args, **task_args):
     set_seed(args.seed)
 
     args.model_config.output_attentions = args.output_attentions
-    #args.model_config.hidden_dropout_prob = args.hidden_dropout_prob
+    args.model_config.hidden_dropout_prob = args.hidden_dropout_prob
+
+    if args.output_attentions and args.eval_batch_size>1: 
+        args.eval_batch_size = 1
+        logger.info(f"Eval batch size set: {args.eval_batch_size}")
+
 
     args.experiment.log_parameters({p.name: getattr(args, p.name) for p in run.params})
     args.model_config.vocab_size += 1
@@ -134,7 +139,7 @@ def run(common_args, **task_args):
         
         for eval_set in ("dev", "test"):
             output_file = os.path.join(args.output_dir, f"{eval_set}_predictions.jsonl")
-            result_dict, sample_size, evaluation_predict_label[eval_set], _ = evaluate(args, model, eval_set, output_file) # output_attentions_format[eval_set]
+            result_dict, sample_size, evaluation_predict_label[eval_set], output_attentions_format[eval_set] = evaluate(args, model, eval_set, output_file) 
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
             dataset_size[f"{eval_set}_samples"] = sample_size
 
@@ -173,9 +178,13 @@ def run(common_args, **task_args):
                                                 "log_parameters": {p.name: getattr(args, p.name) for p in run.params}, 
                                                 "model_config": vars(args.model_config)
                                                 }
-        results["output_attentions_format"] = output_attentions_format
         results["evaluation_predict_label"] = evaluation_predict_label
         args.experiment.log_metrics(results)
+        
+        if args.output_attentions:
+            with open(os.path.join(args.output_dir, "output_attentions.p"), "wb") as f:
+                pickle.dump(output_attentions_format["test"], f)
+                
         with open(os.path.join(args.output_dir, "results.json"), "w") as f:
             json.dump(results, f)
 
@@ -183,7 +192,6 @@ def run(common_args, **task_args):
 
 
 def evaluate(args, model, fold="dev", output_file=None, write_all=False):
-    
     
     def format_attention(attention):
         squeezed = []
@@ -196,7 +204,7 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
         # num_layers x num_heads x seq_len x seq_len
         return torch.stack(squeezed)
         
-    dataloader, _, features, label_list, tokens = load_examples(args, fold=fold)
+    dataloader, examples, features, label_list, tokens = load_examples(args, fold=fold)
     model.eval()
 
     all_logits = []
@@ -206,50 +214,19 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
     for i, batch in enumerate(tqdm(dataloader, desc=fold)):
         inputs = {k: v.to(args.device) for k, v in batch.items() if k != "labels"}
 
-        if args.model_config.output_attentions: 
+        if args.output_attentions: 
             with torch.no_grad():
                 logits, attention_probs = model(**inputs)
                 attention = format_attention(attention_probs)
+                
+                output_attentions_format[f"sent_{i}"] = {}
+                tokens[i].extend(["[MASK]", "[PAD]"]) # adding entity [1, 0] on to the the word_ids 
+                output_attentions_format[f"sent_{i}"]["tokens"] = tokens[i] 
+                output_attentions_format[f"sent_{i}"]["sentence"] = examples[i].text
+                output_attentions_format[f"sent_{i}"]["attention"] = attention.detach().cpu()
         else:
             with torch.no_grad():
                 logits = model(**inputs)
-                attention_probs = None
-        
-
-        # logger.info(f"attention_probs: {attention_probs[0].shape}")
-        # logger.info(f"attention format: {attention[0].shape}")
-
-        output_attentions_format[f"sent_{i}"] = {}
-        
-
-        tokens[i].extend(["[MASK]", "[PAD]"]) # adding entity [1, 0] on to the the word_ids 
-        output_attentions_format[f"sent_{i}"]["tokens"] = tokens[i] 
-        output_attentions_format[f"sent_{i}"]["attention"] = attention.detach().cpu()
-
-        # logger.info(f"output_attentions_format: {output_attentions_format}")
-        
-
-        if i > 1:
-            continue
-
-        # print("\n\n")
-        # logger.info(f"Tokens: {tokens[i]}")
-        # logger.info(f"Tokens len: {len(tokens[i])}")
-        # logger.info(f"word_ids: {inputs['word_ids']}")
-        # logger.info(f"word_ids shape: {inputs['word_ids'].shape}")
-        # logger.info(f"Attention shape: {attention_probs[0].shape}")
-        # logger.info(f"Inputs: {inputs}")
-        # print("\n\n")
-
-        #logger.info(f"inputs: {inputs}")
-        #logger.info(f"batch: {batch}")
-        
-        #logger.info(len(attention_probs))
-
-        # if i > 3:
-        #     break
-
-        # attention_probs : layers x head x seq_len x seq_len
 
         logits = logits.detach().cpu().tolist()
         labels = batch["labels"].to("cpu").tolist()
@@ -257,11 +234,7 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
         all_logits.extend(logits)
         all_labels.extend(labels)
 
-    pickle.dump(output_attentions_format, open( "output_attentions.p", "wb"))
-
-    # logger.info(f"output_attentions_format: {output_attentions_format['sent_1']['tokens']}")
-    # logger.info(f"output_attentions_format: {len(output_attentions_format['sent_1']['tokens'])}")
-    # logger.info(f"output_attentions_format: {output_attentions_format['sent_1']['attention'][0].shape}")
+    #pickle.dump(output_attentions_format, open( "output_attentions.p", "wb"))
 
     all_predicted_indexes = []
     all_label_indexes = []
