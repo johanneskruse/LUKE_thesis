@@ -19,7 +19,7 @@ luke_hpc/out_err_folder_hpc
 luke_experiments/plot*
 all_files
 output/*/
-output*
+#output*
 *.out 
 *.err
 *.bin
