@@ -2,6 +2,18 @@ import json
 import pandas as pd
 import numpy as np
 
+###
+# Helper script useful for inspecting the output. 
+# input (data_dir): test.json, test_prediction.jsonl, results.json
+# outputs: {"sent", "entity", "pred", "label", "top_3_probabilities"}
+###
+
+set_ = "test"
+data_file_dir = f"../data/check_point_file/{set_}.json"
+predict_file_dir = f"../data/check_point_file/{set_}_predictions.jsonl"
+result_file = "../data/check_point_file/results.json"
+
+
 def entity_present(dict_, entity_name):
     entity = 0 
     label = []
@@ -67,11 +79,6 @@ def count_entity_types(list_entity_labels):
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-set_ = "dev"
-
-data_file_dir = f"../data/check_point_file/{set_}.json"
-predict_file_dir = f"../data/check_point_file/{set_}_predictions.jsonl"
-result_file = "../data/check_point_file/results.json"
 
 
 # data_file_dir = f"../data/check_point_file/z_switch_data_sets/{set_}/{set_}.json"

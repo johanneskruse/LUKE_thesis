@@ -293,3 +293,18 @@ tensorboard --logdir luke_experiments/plots_meta_analysis/runs_tensorboards
 ```
 
 This is the default output path from ```meta_analysis.py```.
+
+
+## **Generate output_attentions.p**
+To generate your own output_attentions.p file for visualisation run:
+
+```
+python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> entity-typing run --data-dir=<DATA_DIR> --checkpoint-file=<CHECKPOINT_DIR> --output-attentions --eval-batch-size=1 --no-train
+```
+
+This will generate the pickle file output_attentions.p which contains the “tokens”, “sentence”, and the “attention”. 
+The sentence is the input for the BERT and RoBERTa (and dropdown in tool). The attention score is the attention probability for the token-to-token relationship.  
+
+Note when running *“--outout_attentions”* the *“—eval-batch-size”* will be set to 1. Furthermore, it will appear in the *<OUTPUT_DIR>* folder. 
+
+*For this we recommend selecting a handful of shorter examples, thus, you should modify the test.json. To easily generating the input (e.g. test.json) in the write format simple use add examples in **from_text_to_input.json** and use **from_text_to_input.py** to convert.*

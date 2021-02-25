@@ -23,7 +23,8 @@ output/*/
 *.out 
 *.err
 *.bin
-*.json*
+#*.json*
+error_samples.json
 missclassified_missing_labels*
 *.ipynb_checkpoints/*
 
