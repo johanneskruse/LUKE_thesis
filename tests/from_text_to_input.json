@@ -1,18 +1,23 @@
 {
     "sent1" : "Beyoncé lives in <Los Angeles> .",
     "sentb" : "<Beyoncé> lives in Los Angeles .",
-    "sent2" : "He is a nurse . <She> is a doctor .",
     "sent3" : "<He> is a nurse . She is a doctor .",
-    "sent4" : "He is a nurse . She is a doctor .",
-    "sent5" : "\" For Shanghai to become a financial and economic centre , <it> will have to depend on China 's economy ... it is not dependent on relocating Hong Kong 's economy , \" he said .",
-    "sent7" : "\" For <Shanghai> to become a financial and economic centre , it will have to depend on China 's economy ... it is not dependent on relocating Hong Kong 's economy , \" he said .",
-    "sent8": "The situation is much more pessimistic and tense <half a world away> , in the Middle East .",
+    "sent2" : "He is a nurse . <She> is a doctor .",
+    "sent4" : "<He> is not a nurse . She is a not doctor .",
+    "sentd" : "He is not a nurse . <She> is a not doctor .",
+    "sent5" : "\" For Shanghai to become a financial and economic centre , <it> will have to depend on China 's economy .",
+    "sent7" : "\" For <Shanghai> to become a financial and economic centre , it will have to depend on China 's economy .",
     "sent9": "<The situation> is much more pessimistic and tense half a world away , in the Middle East .",
+    "sent8": "The situation is much more pessimistic and tense <half a world away> , in the Middle East .",
     "senta": "The situation is much more pessimistic and tense half a world away , in <the Middle East> .",
-    
-    
-    
-    "s" : ""
+    "sentt": "The town was captured in 2006 by <the Islamic Court Union> as were the other districts in the region during the civil war",
+    "sensf": "<it> is a not an object and but a person",
+    "sens2": "<it> is an object and not a person",
+    "sendf": "<it> is an object and a person but not an organization",
+    "sensz": "Let <us> eat , Grandma",
+    "senss": "Let us eat <Grandma>",
+    "asd12": "<I> love cooking , my dogs , and my family",
+    "asd13": "<I> love cooking my dogs and my family"
 }
 
 
