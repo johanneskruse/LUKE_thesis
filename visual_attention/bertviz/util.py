@@ -34,10 +34,10 @@ def print_sentence(sent_a, sent_b=None):
     return 
 
 
-def sentence_index(luke_data, sentence_selected):
+def sentence_index(luke_data, sentence_selected, entity):
     index = []
     for i, example in enumerate(luke_data): 
-        if sentence_selected == luke_data[example]["sentence"]:
+        if sentence_selected == luke_data[example]["sentence"] and luke_data[example]["entity"] == entity:
             index = i
     return index
 
