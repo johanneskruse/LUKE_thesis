@@ -40,3 +40,19 @@ def sentence_index(luke_data, sentence_selected):
         if sentence_selected == luke_data[example]["sentence"]:
             index = i
     return index
+
+
+def get_entity_string(data):
+    
+    entity_vector = [data[sent]["entity_position_ids"][0][0] for sent in data]
+    entity_index = [vector[vector > 0] for vector in entity_vector]
+
+    tokens = [format_special_chars(data[sent]["tokens"]) for sent in data]
+    
+    sentences = [data[sent]["sentence"] for sent in data.keys()]
+
+    for i, sent in enumerate(data):
+        data[sent]["entity"] = " ".join(tokens[i][entity_index[i][1]:entity_index[i][-1]])
+        data[sent]["sentence_with_entity"] = sentences[i] + f' [entity:{data[sent]["entity"]}]'
+    
+    return data 

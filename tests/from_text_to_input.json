@@ -1,5 +1,18 @@
 {
-    "sent1" : "For <Shanghai> to become a financial and economic centre , it will have to depend on China 's economy ... it is not dependent on relocating Hong Kong 's economy , \" he said .",
-    "sent2" : "hej med <dig>",
-    "sent": "<it> is a place"
+    "sent1" : "Beyoncé lives in <Los Angeles> .",
+    "sentb" : "<Beyoncé> lives in Los Angeles .",
+    "sent2" : "He is a nurse . <She> is a doctor .",
+    "sent3" : "<He> is a nurse . She is a doctor .",
+    "sent4" : "He is a nurse . She is a doctor .",
+    "sent5" : "\" For Shanghai to become a financial and economic centre , <it> will have to depend on China 's economy ... it is not dependent on relocating Hong Kong 's economy , \" he said .",
+    "sent7" : "\" For <Shanghai> to become a financial and economic centre , it will have to depend on China 's economy ... it is not dependent on relocating Hong Kong 's economy , \" he said .",
+    "sent8": "The situation is much more pessimistic and tense <half a world away> , in the Middle East .",
+    "sent9": "<The situation> is much more pessimistic and tense half a world away , in the Middle East .",
+    "senta": "The situation is much more pessimistic and tense half a world away , in <the Middle East> .",
+    
+    
+    
+    "s" : ""
 }
+
+
