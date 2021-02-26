@@ -3,6 +3,7 @@
     "sentb" : "<Beyonce> lives in Los Angeles .",
     "sent3" : "<He> is a nurse . She is a doctor .",
     "sent2" : "He is a nurse . <She> is a doctor .",
+    "sentv" : "She is a doctor and <he> is a nurse .",
     "sent4" : "<He> is not a nurse . She is a not doctor .",
     "sentd" : "He is not a nurse . <She> is a not doctor .",
     "sent5" : "\" For Shanghai to become a financial and economic centre , <it> will have to depend on China 's economy .",
