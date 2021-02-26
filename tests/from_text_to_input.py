@@ -1,13 +1,13 @@
 import json
 
 # ```
-# Helper script 
+# Helper script: python tests/from_text_to_input.py 
 # Easily convert sentence to input for Entity Typing task. 
 # input: from_text_to_input.json: 
 # from_text_to_input.json format: {"sentX" : "this is a test for <entity>"} --> put < > arount entity
 # ```
 
-data_dir = "tests/text_to_input.json"
+data_dir = "tests/from_text_to_input.json"
 output_dir = "data/outputs/check_point_file/OpenEntity_manipulate_input"
 
 with open(data_dir) as json_file:
@@ -23,7 +23,7 @@ for sentence in sentences:
         if letter == ">":
             end = index-1
 
-    label = []
+    label = ["person"]
     clean_sentence = sentence.replace("<", "").replace(">", "")
     entity = clean_sentence[start:end]
 
@@ -37,5 +37,5 @@ for sentence in sentences:
 # i = 2
 # format_data[i]["sent"][format_data[i]["start"]: format_data[i]["end"]]
 
-with open('test.json', 'w') as outfile:
+with open(f'{output_dir}/test.json', 'w') as outfile:
     json.dump(format_data, outfile)
