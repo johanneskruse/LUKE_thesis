@@ -224,6 +224,7 @@ def evaluate(args, model, fold="dev", output_file=None, write_all=False):
                 output_attentions_format[f"sent_{i}"]["tokens"] = tokens[i] 
                 output_attentions_format[f"sent_{i}"]["sentence"] = examples[i].text
                 output_attentions_format[f"sent_{i}"]["attention"] = attention.detach().cpu()
+                output_attentions_format[f"sent_{i}"]["entity_position_ids"] = inputs["entity_position_ids"].detach().cpu()
         else:
             with torch.no_grad():
                 logits = model(**inputs)
