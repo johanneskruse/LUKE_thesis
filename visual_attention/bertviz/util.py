@@ -56,3 +56,12 @@ def get_entity_string(data):
         data[sent]["sentence_with_entity"] = sentences[i] + f' [entity:{data[sent]["entity"]}]'
     
     return data 
+
+
+def only_mask_attention(output_attention):
+    zero_output_attention = output_attention
+    for i, attention in enumerate(zero_output_attention):
+        for ii, layer in enumerate(attention): 
+            zero_output_attention[i][ii][:-2]   = zero_output_attention[i][ii][:-2]*0
+            zero_output_attention[i][ii][-1]    = zero_output_attention[i][ii][-1]*0
+    return zero_output_attention
