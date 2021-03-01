@@ -100,25 +100,39 @@ def plot_attention_token2token(tokens, attention, token1, token2, color="blue"):
     number_of_layers = len(attention_scores)
     number_of_tokens = len(attention_scores[0])
 
+    labels = np.arange(1,number_of_tokens+1)
+    colors = ["b", "g", "r", "c", "m", "y", "k", "brown", "pink", "gray", "olive", "purple", "tan", "lightcoral", "lime", "navy"]
+    if len(colors) < number_of_tokens:
+        colors = colors = ["b", "orange", "g", "r", "purple", "saddlebrown", "m", "grey", "olive", "c"]*number_of_tokens
+
     # Begin Figure: 
     figure, ax = plt.subplots(figsize=(12,9))
 
-
+    # Plot attention heads:: 
     for i in range(number_of_layers): 
-        ax.plot([i]*number_of_tokens, attention_scores[i], ".", color=color)    
-    avg_attention, = ax.plot(range(len(attention_scores)), attn_token2token_mean, color=color)
-    avg_attention.set_label(f"[{token1}] $\longrightarrow$ [{token2}]")
-    ax.legend()
+        for ii in range(len(attention_scores[i])):
+            ax.plot([i], attention_scores[i][ii], "*", color=colors[ii])    
 
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width*0.6, box.height])
+    legend1 = ax.legend(labels, loc='center left', bbox_to_anchor=(1, 0.5), 
+                        edgecolor="white", title="Attention head", fontsize="medium")
+    ax.add_artist(legend1)
+
+    # Plot average line: 
+    plt.plot(range(len(attention_scores)), attn_token2token_mean, "o-", color=color, 
+            label=f"[{token1}] $\longrightarrow$ [{token2}]")
+    plt.legend()
+    
+    # Finalize plot: 
     ax.set_title("Token-to-Token attention", size="x-large") 
-
     ax.set_xlabel("Layer", fontsize="large")
     ax.set_ylabel("Attention score", fontsize="large")
-
+    ax.set_xticks(range(0, number_of_layers, 2))
+    ax.set_xticklabels(range(0,number_of_layers, 2))
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
     plt.tight_layout()
 
     return figure
-
