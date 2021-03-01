@@ -25,7 +25,9 @@
     "124s3" : "Later , Alice came up to Bob . <She> ",
     "124s6" : "Later , Alice came up to Bob . <He>",
     "124s4" : "The doctor asked the nurse a question . <She>",
-    "124s7" : "The doctor asked the nurse a question . <He>"
+    "124s7" : "The doctor asked the nurse a question . <He>",
+    "12434" : "The nurse asked the doctor a question . <She>",
+    "122s7" : "The nurse asked the doctor a question . <He>"
 }
 
 
