@@ -143,6 +143,11 @@ def run(common_args, **task_args):
             results.update({f"{eval_set}_{k}": v for k, v in result_dict.items()})
             dataset_size[f"{eval_set}_samples"] = sample_size
 
+    if args.output_attentions:
+        for eval_set in ("dev", "test"):
+            with open(os.path.join(args.output_dir, f"output_attentions_{eval_set}.p"), "wb") as f:
+                pickle.dump(output_attentions_format[eval_set], f)
+
     if args.do_train:
         # Print results: 
         logger.info("Results: %s", json.dumps(results, indent=2, sort_keys=True))
@@ -180,10 +185,6 @@ def run(common_args, **task_args):
                                                 }
         results["evaluation_predict_label"] = evaluation_predict_label
         args.experiment.log_metrics(results)
-        
-        if args.output_attentions:
-            with open(os.path.join(args.output_dir, "output_attentions.p"), "wb") as f:
-                pickle.dump(output_attentions_format["test"], f)
                 
         with open(os.path.join(args.output_dir, "results.json"), "w") as f:
             json.dump(results, f)
