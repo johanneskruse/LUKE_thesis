@@ -227,7 +227,7 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
     if len(colors) < len(bin_names):
         colors = list(mcolors.CSS4_COLORS)
     # ==== Figure ==== #
-    figure, ax = plt.subplots(figsize=(18,9))
+    figure, ax = plt.subplots(figsize=(14,10))
     
     for i, bin_ in enumerate(labels):
         ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o-", color=colors[i])
@@ -254,33 +254,38 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
 
 
 # =============================================================== #
-
-data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
+# data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 # data_dir = "/Users/johanneskruse/Desktop/dev_test"
-output_dir = "plot_attention_visualization"
+# output_dir = "plot_attention_visualization"
+
+data_dir = "data/outputs/output_attentions_full_dev_test"
+output_dir = "visual_attention/tests/plot_attention_visualization"
 number_of_bins = 5
-# Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
-attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins)
 
-# Short all attention scores into bins (both dev/test) -> {bin_0 : {attention_scores_layers}, bin_1 :{}, ... }: 
-attention_examples_in_bins = collect_all_attention_scores_from_bins(mean_attention_scores_bins, bin_names)
+for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
+    print(f"Number of bins: {number_of_bins}")
+    # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
+    attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins)
 
-# Get the avg. attention for all examples in the bins -> {bin_0 : {mean_scores_for_all_examples_across_layers}, bin_1 :{}, ... }:
-mean_attention_bins_layers = get_mean_attention_in_bins_from_layers(attention_examples_in_bins)
+    # Short all attention scores into bins (both dev/test) -> {bin_0 : {attention_scores_layers}, bin_1 :{}, ... }: 
+    attention_examples_in_bins = collect_all_attention_scores_from_bins(mean_attention_scores_bins, bin_names)
 
-# ========================== #
-### Plot
-token_hist_plt = plot_hist_token_len(tokens_len=tokens_len, bins=100)
-avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers)
+    # Get the avg. attention for all examples in the bins -> {bin_0 : {mean_scores_for_all_examples_across_layers}, bin_1 :{}, ... }:
+    mean_attention_bins_layers = get_mean_attention_in_bins_from_layers(attention_examples_in_bins)
 
-save = True
+    # ========================== #
+    ### Plot
+    token_hist_plt = plot_hist_token_len(tokens_len=tokens_len, bins=100)
+    avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers)
 
-if save: 
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-    dpi = 300
-    token_hist_plt.savefig(f"{output_dir}/plot_token_len_hist", dpi=dpi)
-    avg_attention_bins_plt.savefig(f"{output_dir}/plot_avg_attention_bins_plt_bins_{number_of_bins}", dpi=dpi)
+    save = True
+    if save: 
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+        print(f"saving plots... {output_dir}")
+        dpi = 300
+        token_hist_plt.savefig(f"{output_dir}/plot_token_len_hist", dpi=dpi)
+        avg_attention_bins_plt.savefig(f"{output_dir}/plot_avg_attention_bins_plt_bins_{number_of_bins}", dpi=dpi)
 
 
 
