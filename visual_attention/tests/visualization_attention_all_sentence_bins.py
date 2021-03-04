@@ -6,6 +6,7 @@ import matplotlib.colors as mcolors
 plt.rcParams.update({'font.size': 30, 'legend.fontsize': 20})
 plt.rc('font', size=25)
 plt.rc('axes', titlesize=25)
+from tqdm import tqdm
 
 # =============================================================== #
 
@@ -222,15 +223,19 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
     Output: figure with avg. attention scores in bins
     '''
     labels = list(mean_attention_bins_layers)
+    
     number_of_layers = len(mean_attention_bins_layers[bin_names[0]])
-    colors = ["b", "g", "r", "c", "m", "brown", "navy", "k", "pink", "gray", "olive", "purple", "y"]
+    colors = ["b", "g", "c", "m", "brown", "navy", "k", "pink", "gray", "olive", "purple", "y"]
     if len(colors) < len(bin_names):
         colors = list(mcolors.CSS4_COLORS)
     # ==== Figure ==== #
     figure, ax = plt.subplots(figsize=(14,10))
     
     for i, bin_ in enumerate(labels):
-        ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o-", color=colors[i])
+        if bin_ == "mask":
+            ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o--", color="black")
+        else:
+            ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o-", color=colors[i])
     
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width*0.6, box.height])
@@ -255,12 +260,12 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
 
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-# data_dir = "/Users/johanneskruse/Desktop/dev_test"
-# output_dir = "plot_attention_visualization"
-
-data_dir = "data/outputs/output_attentions_full_dev_test"
-output_dir = "visual_attention/tests/plot_attention_visualization"
+data_dir = "/Users/johanneskruse/Desktop/dev_test"
+output_dir = "plot_attention_visualization"
 number_of_bins = 5
+
+# data_dir = "data/outputs/output_attentions_full_dev_test"
+# output_dir = "visual_attention/tests/plot_attention_visualization"
 
 for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
     print(f"Number of bins: {number_of_bins}")
@@ -286,8 +291,6 @@ for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
         dpi = 300
         token_hist_plt.savefig(f"{output_dir}/plot_token_len_hist", dpi=dpi)
         avg_attention_bins_plt.savefig(f"{output_dir}/plot_avg_attention_bins_plt_bins_{number_of_bins}", dpi=dpi)
-
-
 
 
 # =============================================================== #
