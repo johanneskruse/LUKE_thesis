@@ -106,7 +106,7 @@ def plot_attention_token2token(tokens, attention, token1, token2, color="blue"):
         colors = colors = ["b", "orange", "g", "r", "purple", "saddlebrown", "m", "grey", "olive", "c"]*number_of_tokens
 
     # Begin Figure: 
-    figure, ax = plt.subplots(figsize=(12,9))
+    figure, ax = plt.subplots(figsize=(14,9))
 
     # Plot attention heads:: 
     for i in range(number_of_layers): 
@@ -133,6 +133,6 @@ def plot_attention_token2token(tokens, attention, token1, token2, color="blue"):
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
-    plt.tight_layout()
+    plt.tight_layout(rect=[0,0,0.8,1])
 
     return figure

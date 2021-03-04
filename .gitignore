@@ -27,6 +27,7 @@ output/*/
 error_samples.json
 missclassified_missing_labels*
 *.ipynb_checkpoints/*
+visual_attention/tests/plot_attention_visualization/*
 
 # Plots:
 scatter_plots

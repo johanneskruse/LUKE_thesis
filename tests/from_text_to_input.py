@@ -34,8 +34,5 @@ for sentence in sentences:
     format_data.append({"sent" : clean_sentence, "start": start, "labels": label, "end": end, "entity" : entity})
 
 
-# i = 2
-# format_data[i]["sent"][format_data[i]["start"]: format_data[i]["end"]]
-
 with open(f'{output_dir}/test.json', 'w') as outfile:
     json.dump(format_data, outfile)
