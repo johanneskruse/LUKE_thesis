@@ -260,15 +260,14 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
 
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-data_dir = "/Users/johanneskruse/Desktop/dev_test"
-output_dir = "plot_attention_visualization"
-number_of_bins = 5
+# data_dir = "/Users/johanneskruse/Desktop/dev_test"
+# output_dir = "plot_attention_visualization"
+# number_of_bins = 5
 
-# data_dir = "data/outputs/output_attentions_full_dev_test"
-# output_dir = "visual_attention/tests/plot_attention_visualization"
+data_dir = "data/outputs/output_attentions_full_dev_test"
+output_dir = "visual_attention/tests/plot_attention_visualization"
 
 for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
-    print(f"Number of bins: {number_of_bins}")
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
     attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins)
 
