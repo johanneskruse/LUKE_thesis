@@ -185,7 +185,7 @@ def get_mean_attention_in_bins_from_layers(attention_examples_in_bins):
     return mean_attention_bins_layers
 
 
-def plot_hist_token_len(tokens_len, bins=50, title="Sentence length distribution"):
+def plot_hist_token_len(tokens_len, bins=50, title=None):
     '''
     Generate histogram for token len distribution
     Input: list of integers [36, 2, 90, ...]
@@ -198,16 +198,27 @@ def plot_hist_token_len(tokens_len, bins=50, title="Sentence length distribution
     min_ = np.min(tokens_len)
     max_ = np.max(tokens_len)
     
-    label = [f"Number of samples: {number_of_samples}\nMax: {max_:.2f}\nMin: {min_:.2f}\n$\mu$: {mean_:.2f}\n$\sigma$: {std_:.2f}"]
+    if title is None:
+        title=f"Tokens in a sentence distribution\nNumber of samples: {number_of_samples}, bins: {bins}"
+    #label = [f"Number of samples: {number_of_samples}"]
 
     # ==== Figure ==== #
     figure, ax = plt.subplots(figsize=(12,9))
-    plt.hist(tokens_len, label=label[0],bins=bins)
+    ax.hist(tokens_len,bins=bins)
+    # ax.hist(tokens_len, label=label[0],bins=bins)
+
+    plt.axvline(x=max_, label=f'Max = {max_:.2f}', c="green")
+    plt.axvline(x=min_, label=f'Min = {min_:.2f}', c="purple")
+    plt.axvline(x=mean_, label=f'$\mu$= {mean_:.2f}', c="black")
+    plt.axvline(x=mean_+std_, label=f'$\sigma$: {std_:.2f}', c="red")
+    plt.axvline(x=mean_-std_, c="red")
 
     ax.set_title(title, size="x-large") 
     ax.set_xlabel("Number of token in sentence", fontsize="large")
     ax.set_ylabel("Count", fontsize="large")
-    plt.legend()
+    ax.legend()
+
+
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
@@ -260,12 +271,12 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
 
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-# data_dir = "/Users/johanneskruse/Desktop/dev_test"
-# output_dir = "plot_attention_visualization"
-# number_of_bins = 5
+data_dir = "/Users/johanneskruse/Desktop/dev_test"
+output_dir = "plot_attention_visualization"
+number_of_bins = 5
 
-data_dir = "data/outputs/output_attentions_full_dev_test"
-output_dir = "visual_attention/tests/plot_attention_visualization"
+# data_dir = "data/outputs/output_attentions_full_dev_test"
+# output_dir = "visual_attention/tests/plot_attention_visualization"
 
 for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
