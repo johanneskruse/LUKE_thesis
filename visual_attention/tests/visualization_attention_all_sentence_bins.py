@@ -279,6 +279,7 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
 
     return figure
 
+
 def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", save=True):
     '''
     Sum the global attention for each bins. Gives an intuative feeling of the number of bins.
@@ -298,7 +299,7 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 # data_dir = "/Users/johanneskruse/Desktop/dev_test"
-# output_dir = "plot_attention_visualization"
+output_dir = "plot_attention_visualization"
 # number_of_bins = 12
 
 data_dir = "data/outputs/output_attentions_full_dev_test"
@@ -349,16 +350,3 @@ if sanity:
     data = pickle.load(open( os.path.join(data_dir, f"output_attentions_test.p"), "rb"))
     data["sent_28"]["attention"][0][0][-2]
     attention_scores_bins["dev"]["sent_28"]["layer_0"]["head_0"]
-
-tokens_len
-
-np.array(list(Counter(tokens_len).values()))
-np.array(list(Counter(tokens_len).values())).argsort()[-4:][::-1]
-
-np.array(list(Counter(tokens_len).values()))[31]
-np.array(list(Counter(tokens_len).values()))[3]
-np.array(list(Counter(tokens_len).values()))[11]
-np.array(list(Counter(tokens_len).values()))[0]
-
-
-np.array(list(Counter(tokens_len).values()))[31]
