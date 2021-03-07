@@ -240,10 +240,17 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
     '''
     labels = list(mean_attention_bins_layers)
     
+    top_x_to_inlude = 11
+    if len(labels) > top_x_to_inlude:
+        global_means = get_global_mean_attention_bins(mean_attention_bins_layers, save=False)
+        index = sorted(np.array(list(global_means.values())).argsort()[-top_x_to_inlude:][::-1])
+        labels = [labels[ind] for ind in index]
+
     number_of_layers = len(mean_attention_bins_layers[bin_names[0]])
     colors = ["b", "g", "c", "m", "brown", "navy", "k", "pink", "gray", "olive", "purple", "y"]
-    if len(colors) < len(bin_names):
-        colors = list(mcolors.CSS4_COLORS)
+    # if len(colors) < len(bin_names):
+    #     colors = list(mcolors.CSS4_COLORS)[20:]
+    
     # ==== Figure ==== #
     figure, ax = plt.subplots(figsize=(14,10))
     
@@ -255,7 +262,7 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
     
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width*0.6, box.height])
-    legend1 = ax.legend(labels, loc='lower left', bbox_to_anchor=(1, 0.4), 
+    legend1 = ax.legend(labels, loc='lower left', bbox_to_anchor=(1, 0), 
                         edgecolor="white", title="Bin", fontsize="medium")
     ax.add_artist(legend1)
 
@@ -285,19 +292,24 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
     if save: 
         with open(f'{output_dir}/bins_{num_bins}.txt', 'w') as outfile:
             json.dump(global_mean_in_bin, outfile)
+    
+    return global_mean_in_bin
 
 # =============================================================== #
-# data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-data_dir = "/Users/johanneskruse/Desktop/dev_test"
+data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
+# data_dir = "/Users/johanneskruse/Desktop/dev_test"
 output_dir = "plot_attention_visualization"
-number_of_bins = 5
+number_of_bins = 12
 
 # data_dir = "data/outputs/output_attentions_full_dev_test"
 # output_dir = "visual_attention/tests/plot_attention_visualization"
 
-for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
+for number_of_bins in tqdm([2, 4, 6, 8, 16, 32, 33, 34, 35]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
-    attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=None)
+    if number_of_bins in [32, 33, 34, 35]:
+        attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=number_of_bins)
+    else:
+        attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=None)
 
     # Short all attention scores into bins (both dev/test) -> {bin_0 : {attention_scores_layers}, bin_1 :{}, ... }: 
     attention_examples_in_bins = collect_all_attention_scores_from_bins(mean_attention_scores_bins, bin_names)
@@ -306,7 +318,7 @@ for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
     mean_attention_bins_layers = get_mean_attention_in_bins_from_layers(attention_examples_in_bins)
     
     # Dump files with the global attention for each bin.
-    get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=output_dir, save=True)
+    _ = get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=output_dir, save=True)
     
     # ========================== #
     ### Plot
@@ -337,3 +349,16 @@ if sanity:
     data = pickle.load(open( os.path.join(data_dir, f"output_attentions_test.p"), "rb"))
     data["sent_28"]["attention"][0][0][-2]
     attention_scores_bins["dev"]["sent_28"]["layer_0"]["head_0"]
+
+tokens_len
+
+np.array(list(Counter(tokens_len).values()))
+np.array(list(Counter(tokens_len).values())).argsort()[-4:][::-1]
+
+np.array(list(Counter(tokens_len).values()))[31]
+np.array(list(Counter(tokens_len).values()))[3]
+np.array(list(Counter(tokens_len).values()))[11]
+np.array(list(Counter(tokens_len).values()))[0]
+
+
+np.array(list(Counter(tokens_len).values()))[31]
