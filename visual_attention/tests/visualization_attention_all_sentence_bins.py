@@ -356,8 +356,8 @@ np.array(list(Counter(tokens_len).values()))
 np.array(list(Counter(tokens_len).values())).argsort()[-4:][::-1]
 
 np.array(list(Counter(tokens_len).values()))[31]
-np.array(list(Counter(tokens_len).values()))[3]
-np.array(list(Counter(tokens_len).values()))[11]
+np.array(list(Counter(tokens_len).values()))[33]
+np.array(list(Counter(tokens_len).values()))[12]
 np.array(list(Counter(tokens_len).values()))[0]
 
 
