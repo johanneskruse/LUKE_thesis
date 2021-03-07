@@ -204,7 +204,7 @@ def plot_hist_token_len(tokens_len, bins=50, title=None):
     max_ = np.max(tokens_len)
     
     if title is None:
-        title=f"Tokens in a sentence distribution\nNumber of samples: {number_of_samples}, bins: {bins}"
+        title=f"Tokens in sentences distribution\nNumber of samples: {number_of_samples}, bins: {bins}"
     #label = [f"Number of samples: {number_of_samples}"]
 
     # ==== Figure ==== #
@@ -213,7 +213,7 @@ def plot_hist_token_len(tokens_len, bins=50, title=None):
     # ax.hist(tokens_len, label=label[0],bins=bins)
 
     plt.axvline(x=max_, label=f'Max = {max_:.2f}', c="green")
-    plt.axvline(x=min_, label=f'Min = {min_:.2f}', c="purple")
+    plt.axvline(x=min_, label=f'Min = {min_:.2f}', c="green")
     plt.axvline(x=mean_, label=f'$\mu$= {mean_:.2f}', c="black")
     plt.axvline(x=mean_+std_, label=f'$\sigma$: {std_:.2f}', c="red")
     plt.axvline(x=mean_-std_, c="red")
@@ -296,13 +296,13 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
     return global_mean_in_bin
 
 # =============================================================== #
-data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
+# data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 # data_dir = "/Users/johanneskruse/Desktop/dev_test"
-output_dir = "plot_attention_visualization"
-number_of_bins = 12
+# output_dir = "plot_attention_visualization"
+# number_of_bins = 12
 
-# data_dir = "data/outputs/output_attentions_full_dev_test"
-# output_dir = "visual_attention/tests/plot_attention_visualization"
+data_dir = "data/outputs/output_attentions_full_dev_test"
+output_dir = "visual_attention/tests/plot_attention_visualization"
 
 for number_of_bins in tqdm([2, 4, 6, 8, 16, 32, 33, 34, 35]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
