@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 import os
+import json
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 plt.rcParams.update({'font.size': 30, 'legend.fontsize': 20})
@@ -11,7 +12,7 @@ from tqdm import tqdm
 # =============================================================== #
 
 
-def attention_scores_and_mean_in_layer_bins(data_dir, mask_index=-2, number_of_bins=5, eval_sets = ["test", "dev"]):
+def attention_scores_and_mean_in_layer_bins(data_dir, mask_index=-2, number_of_bins=5, include_only_token_len=None, eval_sets = ["test", "dev"]):
     '''
     Given add data_dir it will convert the attention scores (layer x head x seq_len x seq_len) 
     into bins, both "raw" (only converting into bins) and the mean attention score for each bin
@@ -80,6 +81,10 @@ def attention_scores_and_mean_in_layer_bins(data_dir, mask_index=-2, number_of_b
             if number_of_bins > number_of_tokens: 
                print(f"[not included] Sample: {example} has {number_of_tokens} tokens but was asked for {number_of_bins} bins")
                continue
+            if include_only_token_len is not None:
+                if number_of_tokens is not include_only_token_len:
+                    continue
+            
             tokens_in_sentence.append(number_of_tokens)
             
             # Use functions: 
@@ -267,7 +272,19 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
 
     return figure
 
-
+def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", save=True):
+    '''
+    Sum the global attention for each bins. Gives an intuative feeling of the number of bins.
+    Save and it dumps the file as txt.
+    '''
+    global_mean_in_bin = {}
+    for bin_ in mean_attention_bins_layers.keys():
+        global_mean_in_bin[bin_] = np.mean(mean_attention_bins_layers[bin_])
+        
+    num_bins = len(mean_attention_bins_layers)-1
+    if save: 
+        with open(f'{output_dir}/bins_{num_bins}.txt', 'w') as outfile:
+            json.dump(global_mean_in_bin, outfile)
 
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
@@ -280,14 +297,17 @@ number_of_bins = 5
 
 for number_of_bins in tqdm([1,2,3,4,5,6,7,8]):
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
-    attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins)
+    attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=None)
 
     # Short all attention scores into bins (both dev/test) -> {bin_0 : {attention_scores_layers}, bin_1 :{}, ... }: 
     attention_examples_in_bins = collect_all_attention_scores_from_bins(mean_attention_scores_bins, bin_names)
 
     # Get the avg. attention for all examples in the bins -> {bin_0 : {mean_scores_for_all_examples_across_layers}, bin_1 :{}, ... }:
     mean_attention_bins_layers = get_mean_attention_in_bins_from_layers(attention_examples_in_bins)
-
+    
+    # Dump files with the global attention for each bin.
+    get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=output_dir, save=True)
+    
     # ========================== #
     ### Plot
     token_hist_plt = plot_hist_token_len(tokens_len=tokens_len, bins=100)
