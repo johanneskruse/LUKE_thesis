@@ -256,15 +256,15 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
     # ==== Figure ==== #
     figure, ax = plt.subplots(figsize=(18,10))
     
-    for i, bin_ in enumerate(mean_attention_bins_layers.keys()):
+    for i, bin_ in enumerate(keys):
         if bin_ == "mask":
-            ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o--", color="black", label=labels[-1])
+            ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o--", color="black")
         else:
             ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o-", color=colors[i])
     
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width*0.6, box.height])
-    legend1 = ax.legend(labels[:-1], loc='lower left', bbox_to_anchor=(1, 0), 
+    legend1 = ax.legend(labels[:], loc='lower left', bbox_to_anchor=(1, 0), 
                         edgecolor="white", title="Bin", fontsize="medium")
     ax.add_artist(legend1)
 
@@ -302,7 +302,7 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 data_dir = "/Users/johanneskruse/Desktop/dev_test"
 output_dir = "plot_attention_visualization"
-number_of_bins = 11
+number_of_bins = 12
 
 # data_dir = "data/outputs/output_attentions_full_dev_test"
 # output_dir = "visual_attention/tests/plot_attention_visualization"
