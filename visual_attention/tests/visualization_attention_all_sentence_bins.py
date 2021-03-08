@@ -238,31 +238,33 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
     Input: mean_attention_bins_layers
     Output: figure with avg. attention scores in bins
     '''
-    labels = list(mean_attention_bins_layers)
+    keys = list(mean_attention_bins_layers)
     
     top_x_to_inlude = 11
-    if len(labels) > top_x_to_inlude:
+    if len(keys) > top_x_to_inlude:
         global_means = get_global_mean_attention_bins(mean_attention_bins_layers, save=False)
         index = sorted(np.array(list(global_means.values())).argsort()[-top_x_to_inlude:][::-1])
-        labels = [labels[ind] for ind in index]
+        keys = [keys[ind] for ind in index]
+
+    labels = [f"{lab} (acc. attn. {np.mean(mean_attention_bins_layers[lab]):.2f})" for lab in keys]
 
     number_of_layers = len(mean_attention_bins_layers[bin_names[0]])
-    colors = ["b", "g", "c", "m", "brown", "navy", "k", "pink", "gray", "olive", "purple", "y"]
+    colors = ["b", "g", "c", "m", "brown", "purple", "navy", "pink", "gray", "olive", "black"]
     # if len(colors) < len(bin_names):
     #     colors = list(mcolors.CSS4_COLORS)[20:]
     
     # ==== Figure ==== #
-    figure, ax = plt.subplots(figsize=(14,10))
+    figure, ax = plt.subplots(figsize=(18,10))
     
-    for i, bin_ in enumerate(labels):
+    for i, bin_ in enumerate(mean_attention_bins_layers.keys()):
         if bin_ == "mask":
-            ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o--", color="black")
+            ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o--", color="black", label=labels[-1])
         else:
             ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o-", color=colors[i])
     
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width*0.6, box.height])
-    legend1 = ax.legend(labels, loc='lower left', bbox_to_anchor=(1, 0), 
+    legend1 = ax.legend(labels[:-1], loc='lower left', bbox_to_anchor=(1, 0), 
                         edgecolor="white", title="Bin", fontsize="medium")
     ax.add_artist(legend1)
 
@@ -275,9 +277,10 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, title="Average a
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
-    plt.tight_layout(rect=[0,0,0.85,1])
+    plt.tight_layout(rect=[0,0,0.72,1])
 
     return figure
+
 
 def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", save=True):
     '''
@@ -297,12 +300,12 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
 
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-# data_dir = "/Users/johanneskruse/Desktop/dev_test"
-# output_dir = "plot_attention_visualization"
-# number_of_bins = 12
+data_dir = "/Users/johanneskruse/Desktop/dev_test"
+output_dir = "plot_attention_visualization"
+number_of_bins = 11
 
-data_dir = "data/outputs/output_attentions_full_dev_test"
-output_dir = "visual_attention/tests/plot_attention_visualization"
+# data_dir = "data/outputs/output_attentions_full_dev_test"
+# output_dir = "visual_attention/tests/plot_attention_visualization"
 
 for number_of_bins in tqdm([2, 4, 6, 8, 16, 32, 33, 34, 35]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
@@ -323,7 +326,7 @@ for number_of_bins in tqdm([2, 4, 6, 8, 16, 32, 33, 34, 35]): # 32: 142, 33: 145
     # ========================== #
     ### Plot
     token_hist_plt = plot_hist_token_len(tokens_len=tokens_len, bins=100)
-    avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers)
+    avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers, title=f"Average attention score for sentence in bins\nNo. samples={len(tokens_len)}")
 
     save = True
     if save: 
@@ -349,16 +352,3 @@ if sanity:
     data = pickle.load(open( os.path.join(data_dir, f"output_attentions_test.p"), "rb"))
     data["sent_28"]["attention"][0][0][-2]
     attention_scores_bins["dev"]["sent_28"]["layer_0"]["head_0"]
-
-tokens_len
-
-np.array(list(Counter(tokens_len).values()))
-np.array(list(Counter(tokens_len).values())).argsort()[-4:][::-1]
-
-np.array(list(Counter(tokens_len).values()))[31]
-np.array(list(Counter(tokens_len).values()))[33]
-np.array(list(Counter(tokens_len).values()))[12]
-np.array(list(Counter(tokens_len).values()))[0]
-
-
-np.array(list(Counter(tokens_len).values()))[31]
