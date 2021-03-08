@@ -299,17 +299,17 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
     return global_mean_in_bin
 
 # =============================================================== #
-# data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-data_dir = "/Users/johanneskruse/Desktop/dev_test"
+data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
+# data_dir = "/Users/johanneskruse/Desktop/dev_test"
 output_dir = "plot_attention_visualization"
 number_of_bins = 12
 
 # data_dir = "data/outputs/output_attentions_full_dev_test"
 # output_dir = "visual_attention/tests/plot_attention_visualization"
 
-for number_of_bins in tqdm([2, 4, 6, 8, 16, 32, 33, 34, 35]): # 32: 142, 33: 145, 34: 135, 35: 150
+for number_of_bins in tqdm([2, 4, 6, 8, 16, 29, 32, 35, 41, 45, 48, 50, 52, 64, 72, 98]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
-    if number_of_bins in [32, 33, 34, 35]:
+    if number_of_bins in [29, 32, 33, 34, 35, 41, 45, 48, 50, 52, 64, 72, 98]:
         attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=number_of_bins)
     else:
         attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=None)
