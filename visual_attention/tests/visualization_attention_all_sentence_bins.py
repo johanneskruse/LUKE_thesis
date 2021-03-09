@@ -259,7 +259,7 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bi
         index = sorted(np.array(list(global_means.values())).argsort()[-top_x_to_inlude:][::-1])
         keys = [keys[ind] for ind in index]
 
-    labels = [f"{lab} (acc. attn. {np.mean(mean_attention_bins_layers[lab]):.2f},  $\sigma$ = {np.mean(var_attention_bins_layers[lab]):.2f})" for lab in keys]
+    labels = [f"{lab} (acc. attn. {np.mean(mean_attention_bins_layers[lab]):.2f})" for lab in keys]
 
     number_of_layers = len(mean_attention_bins_layers[bin_names[0]])
     colors = ["b", "g", "c", "m", "brown", "purple", "navy", "pink", "gray", "olive", "black"]
@@ -298,7 +298,7 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bi
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
-    plt.tight_layout(rect=[0,0,0.65,1])
+    plt.tight_layout(rect=[0,0,0.74,1])
 
     return figure
 
@@ -347,7 +347,7 @@ for number_of_bins in tqdm([2, 4, 6, 8, 16, 29, 32, 35, 41, 45, 48, 50, 52, 64, 
     # ========================== #
     ### Plot
     token_hist_plt = plot_hist_token_len(tokens_len=tokens_len, bins=100)
-    avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score for sentence in bins\nNo. samples={len(tokens_len)}")
+    avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score for sentence in bins\nNo. samples={len(tokens_len)}, with errors bars")
     avg_attention_bins_plt_mask = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score mask$\longrightarrow$mask attention", mask_to_mask=True)
 
     save = True
