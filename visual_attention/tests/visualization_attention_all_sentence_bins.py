@@ -325,6 +325,9 @@ data_dir = "/Users/johanneskruse/Desktop/dev_test"
 output_dir = "plot_attention_visualization"
 number_of_bins = 5
 
+if not os.path.exists(output_dir):
+    os.mkdir(output_dir)
+
 # data_dir = "data/outputs/output_attentions_full_dev_test"
 # output_dir = "visual_attention/tests/plot_attention_visualization"
 
@@ -352,8 +355,6 @@ for number_of_bins in tqdm([2, 4, 6, 8, 16, 29, 32, 35, 41, 45, 48, 50, 52, 64, 
 
     save = True
     if save: 
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
         print(f"saving plots... {output_dir}")
         dpi = 300
         token_hist_plt.savefig(f"{output_dir}/plot_token_len_hist_{number_of_bins}", dpi=dpi)
