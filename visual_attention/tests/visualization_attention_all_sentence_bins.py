@@ -282,11 +282,12 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bi
                 # ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o-", color=colors[i])
                 ax.errorbar(range(number_of_layers), mean_attention_bins_layers[bin_], yerr=var_attention_bins_layers[bin_], color=colors[i])
     
-            box = ax.get_position()
-            ax.set_position([box.x0, box.y0, box.width*0.6, box.height])
-            legend1 = ax.legend(labels[:], loc='lower left', bbox_to_anchor=(1, 0), 
-                                edgecolor="white", title="Bin", fontsize="medium")
-            ax.add_artist(legend1)
+    if not mask_to_mask:
+        box = ax.get_position()
+        ax.set_position([box.x0, box.y0, box.width*0.6, box.height])
+        legend1 = ax.legend(labels[:], loc='lower left', bbox_to_anchor=(1, 0), 
+                            edgecolor="white", title="Bin", fontsize="medium")
+        ax.add_artist(legend1)
 
     ax.set_title(title, size="x-large") 
     ax.set_xlabel("Layer", fontsize="large")
@@ -322,7 +323,7 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 data_dir = "/Users/johanneskruse/Desktop/dev_test"
 output_dir = "plot_attention_visualization"
-number_of_bins = 12
+number_of_bins = 5
 
 # data_dir = "data/outputs/output_attentions_full_dev_test"
 # output_dir = "visual_attention/tests/plot_attention_visualization"
