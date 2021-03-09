@@ -325,8 +325,16 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
 # output_dir = "plot_attention_visualization"
 # number_of_bins = 5
 
+<<<<<<< HEAD
 data_dir = "data/outputs/output_attentions_full_dev_test"
 output_dir = "visual_attention/tests/plot_attention_visualization"
+=======
+if not os.path.exists(output_dir):
+    os.mkdir(output_dir)
+
+# data_dir = "data/outputs/output_attentions_full_dev_test"
+# output_dir = "visual_attention/tests/plot_attention_visualization"
+>>>>>>> 6fc1ca7afae097869c05a66c0849c98a636ab18f
 
 for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
@@ -352,8 +360,6 @@ for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97]): # 32: 142, 33
 
     save = True
     if save: 
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
         print(f"saving plots... {output_dir}")
         dpi = 300
         token_hist_plt.savefig(f"{output_dir}/plot_token_len_hist_{number_of_bins}", dpi=dpi)
