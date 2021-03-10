@@ -320,25 +320,20 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
     return global_mean_in_bin
 
 # =============================================================== #
-# data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
+data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 # data_dir = "/Users/johanneskruse/Desktop/dev_test"
-# output_dir = "plot_attention_visualization"
-# number_of_bins = 5
+output_dir = "plot_attention_visualization"
+number_of_bins = 98
 
-<<<<<<< HEAD
-data_dir = "data/outputs/output_attentions_full_dev_test"
-output_dir = "visual_attention/tests/plot_attention_visualization"
-=======
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
 # data_dir = "data/outputs/output_attentions_full_dev_test"
 # output_dir = "visual_attention/tests/plot_attention_visualization"
->>>>>>> 6fc1ca7afae097869c05a66c0849c98a636ab18f
 
-for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97]): # 32: 142, 33: 145, 34: 135, 35: 150
+for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
-    if number_of_bins in [35, 50, 64, 72, 84, 97]:
+    if number_of_bins in [35, 50, 64, 72, 84, 97, 98, 114]:
         attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names, sentences = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=number_of_bins)
     else:
         attention_scores_bins, mean_attention_scores_bins, tokens_len, bin_names, sentences = attention_scores_and_mean_in_layer_bins(data_dir, number_of_bins=number_of_bins, include_only_token_len=None)
@@ -356,7 +351,7 @@ for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97]): # 32: 142, 33
     ### Plot
     token_hist_plt = plot_hist_token_len(tokens_len=tokens_len, bins=100)
     avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score for sentence in bins\nNo. samples={len(tokens_len)}, with errors bars")
-    avg_attention_bins_plt_mask = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score mask$\longrightarrow$mask attention", mask_to_mask=True)
+    avg_attention_bins_plt_mask = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score [mask]$\longrightarrow$[mask] attention\nNo. samples={len(tokens_len)}", mask_to_mask=True)
 
     save = True
     if save: 
