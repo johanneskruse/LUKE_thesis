@@ -320,16 +320,17 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
     return global_mean_in_bin
 
 # =============================================================== #
-data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
+# data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 # data_dir = "/Users/johanneskruse/Desktop/dev_test"
-output_dir = "plot_attention_visualization"
-number_of_bins = 98
+# output_dir = "plot_attention_visualization"
+# number_of_bins = 98
+
+data_dir = "data/outputs/output_attentions_full_dev_test"
+output_dir = "visual_attention/tests/plot_attention_visualization"
 
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
-# data_dir = "data/outputs/output_attentions_full_dev_test"
-# output_dir = "visual_attention/tests/plot_attention_visualization"
 
 for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
