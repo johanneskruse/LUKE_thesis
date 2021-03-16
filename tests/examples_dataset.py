@@ -98,6 +98,8 @@ for z in range(3):
         print(train_conll[z][0][i], train_conll[z][1][i])
     print("")
 
+## Treasury I-ORG O, check: print(train_conll[31][0][63], train_conll[31][1][63])
+
 print("=======================")
 
 # Open Entity: 

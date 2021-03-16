@@ -52,13 +52,13 @@ def plot_multi_token_attention(he_doctor, he_nurse, she_doctor, she_nurse, title
     number_of_layers = len(he_doctor)    
 
     labels = [
-        f"[He] $\longrightarrow$ [doctor] [avg. {np.mean(he_doctor):.4f}]",
-        f"[He] $\longrightarrow$ [nurse] [avg. {np.mean(he_nurse):.4f}]",
-        f"[She] $\longrightarrow$ [doctor] [avg. {np.mean(she_doctor):.4f}]",
-        f"[She] $\longrightarrow$ [nurse] [avg. {np.mean(she_nurse):.4f}]"
+        f"[He] $\longrightarrow$ [doctor] [$\mu$ {np.mean(he_doctor):.4f}, $\sigma^2$: {np.var(he_doctor):.4f}]",
+        f"[He] $\longrightarrow$ [nurse] [$\mu$ {np.mean(he_nurse):.4f}, $\sigma^2$: {np.var(he_nurse):.4f}]",
+        f"[She] $\longrightarrow$ [doctor] [$\mu$ {np.mean(she_doctor):.4f}, $\sigma^2$: {np.var(she_doctor):.4f}]",
+        f"[She] $\longrightarrow$ [nurse] [$\mu$ {np.mean(she_nurse):.4f}, $\sigma^2$: {np.var(she_nurse):.4f}]"
         ]
 
-    figure, ax = plt.subplots(figsize=(18,9))
+    figure, ax = plt.subplots(figsize=(20,9))
     ax.plot(range(number_of_layers), he_doctor, 'o--', color="b")
     ax.plot(range(number_of_layers), he_nurse, '*-', color="g")
     ax.plot(range(number_of_layers), she_doctor, 'o--', color="k")
@@ -80,7 +80,7 @@ def plot_multi_token_attention(he_doctor, he_nurse, she_doctor, she_nurse, title
     plt.tick_params(axis='x', labelsize="large")
     plt.tick_params(axis='y', labelsize="large")
     plt.grid()
-    plt.tight_layout(rect=[0,0,0.6,1])
+    plt.tight_layout(rect=[0,0,0.55,1])
 
     return figure 
 
@@ -131,12 +131,19 @@ if save:
 def significant_tests(samples_1, samples_2):
     _, p1 = stats.ttest_rel(samples_1, samples_2)
     _, p2 = stats.wilcoxon(samples_1, samples_2)
-    print(f"paired p-value {p1}")
-    print(f"Wilcoxon p-value {p2}")
+    # print(f"paired p-value {p1}")
+    # print(f"Wilcoxon p-value {p2}")
     return p1, p2
 
-significant_tests(he_doctor_dn, she_doctor_dn)
-significant_tests(he_nurse_dn, she_nurse_dn)
-significant_tests(he_doctor_nd, she_doctor_nd)
-significant_tests(he_nurse_nd, she_nurse_nd)
+def print_mean_var(she, he, sent):
+    p_paired, p_wilcoxon = significant_tests(she, he)
+
+    print(f"mean {sent} [she, he] [{np.mean(she_doctor_dn)}, {np.mean(he_doctor_dn)}]")
+    print(f"var {sent} [she, he] [{np.var(she_doctor_dn)}, {np.var(he_doctor_dn)}]")
+    print(f"p-val {sent} [paired t-test, wilcoxon test] : [{p_paired}, {p_wilcoxon}]")
+
+print_mean_var(she_doctor_dn, he_doctor_dn, "(doctor, nurse) -> doctor")
+print_mean_var(she_nurse_dn, he_nurse_dn, "(doctor, nurse) -> nurse")
+print_mean_var(she_doctor_nd, he_doctor_nd, "(doctor, nurse) -> doctor")
+print_mean_var(she_nurse_nd, he_nurse_nd, "(doctor, nurse) -> doctor")
 
