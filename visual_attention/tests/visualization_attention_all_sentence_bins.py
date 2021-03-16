@@ -177,6 +177,7 @@ def get_mean_attention_in_bins_from_layers(attention_examples_in_bins):
 
     mean_attention_bins_layers = {}
     var_attention_bins_layers = {}
+    SE_attention_bins_layers = {}
     for bin_ in bin_names:
 
         # Compute the mean: mu = sim(xi)/N
@@ -190,17 +191,20 @@ def get_mean_attention_in_bins_from_layers(attention_examples_in_bins):
         
         mean_attention_bins_layers[bin_] = add_attention_layer_in_bin / number_of_samples
 
-        # Variance^2 = sum (xi - mu)^2 / N 
+        # Variance^2 = sum (xi - mu)^2 / (N-1) 
         for i, example_in_bin in enumerate(attention_examples_in_bins[bin_]):
-            if i == 0:
+            if i == 0: # p = (xi - mu)^2
                 add_attention_layer_in_bin = (np.array(list(example_in_bin.values())) - mean_attention_bins_layers[bin_])**2
-            else: 
-                add_attention_layer_in_bin = (add_attention_layer_in_bin - np.array(list(example_in_bin.values())))**2
+            else: # p = p + (xi - mu)^2
+                add_attention_layer_in_bin = add_attention_layer_in_bin + (np.array(list(example_in_bin.values())) - mean_attention_bins_layers[bin_])**2
 
+        # var^2 = p / (n-1)
+        var_attention_bins_layers[bin_] = add_attention_layer_in_bin / (number_of_samples-1)
 
-        var_attention_bins_layers[bin_] = add_attention_layer_in_bin / number_of_samples
+        # SE = sqrt(var)/sqrt(N)
+        SE_attention_bins_layers[bin_] = np.sqrt(var_attention_bins_layers[bin_])/np.sqrt(number_of_samples)
     
-    return mean_attention_bins_layers, var_attention_bins_layers
+    return mean_attention_bins_layers, var_attention_bins_layers, SE_attention_bins_layers
 
 
 def plot_hist_token_len(tokens_len, bins=50, title=None):
@@ -245,7 +249,7 @@ def plot_hist_token_len(tokens_len, bins=50, title=None):
     return figure 
 
 
-def plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title="Average attention score for sentence in bins", mask_to_mask=False): 
+def plot_bins_attention_scores_mean(mean_attention_bins_layers, SE_attention_bins_layers, title="Average attention score for sentence in bins", mask_to_mask=False): 
     '''
     Plot the average attention scores from bins
     Input: mean_attention_bins_layers
@@ -273,14 +277,14 @@ def plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bi
         if mask_to_mask:
             if bin_ == "mask":
                 # plt.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o--", color="black", label=labels[-1])
-                ax.errorbar(range(number_of_layers), mean_attention_bins_layers[bin_], yerr=var_attention_bins_layers[bin_], label=labels[-1], color="black")
+                ax.errorbar(range(number_of_layers), mean_attention_bins_layers[bin_], yerr=SE_attention_bins_layers[bin_], label=labels[-1], color="black")
         else:
             if bin_ == "mask":
                 continue
                 ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o--", color="black")
             else:
                 # ax.plot(range(number_of_layers), mean_attention_bins_layers[bin_], "o-", color=colors[i])
-                ax.errorbar(range(number_of_layers), mean_attention_bins_layers[bin_], yerr=var_attention_bins_layers[bin_], color=colors[i])
+                ax.errorbar(range(number_of_layers), mean_attention_bins_layers[bin_], yerr=SE_attention_bins_layers[bin_], color=colors[i])
     
     if not mask_to_mask:
         box = ax.get_position()
@@ -321,12 +325,12 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
 
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-# data_dir = "/Users/johanneskruse/Desktop/dev_test"
-# output_dir = "plot_attention_visualization"
-# number_of_bins = 98
+data_dir = "/Users/johanneskruse/Desktop/dev_test"
+output_dir = "plot_attention_visualization"
+number_of_bins = 5
 
-data_dir = "data/outputs/output_attentions_full_dev_test"
-output_dir = "visual_attention/tests/plot_attention_visualization"
+# data_dir = "data/outputs/output_attentions_full_dev_test"
+# output_dir = "visual_attention/tests/plot_attention_visualization"
 
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
@@ -343,7 +347,7 @@ for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32
     attention_examples_in_bins = collect_all_attention_scores_from_bins(mean_attention_scores_bins, bin_names)
 
     # Get the avg. attention for all examples in the bins -> {bin_0 : {mean_scores_for_all_examples_across_layers}, bin_1 :{}, ... }:
-    mean_attention_bins_layers, var_attention_bins_layers = get_mean_attention_in_bins_from_layers(attention_examples_in_bins)
+    mean_attention_bins_layers, var_attention_bins_layers, SE_attention_bins_layers = get_mean_attention_in_bins_from_layers(attention_examples_in_bins)
     
     # Dump files with the global attention for each bin.
     _ = get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=output_dir, save=True)
@@ -351,8 +355,8 @@ for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32
     # ========================== #
     ### Plot
     token_hist_plt = plot_hist_token_len(tokens_len=tokens_len, bins=100)
-    avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score for sentence in bins\nNo. samples={len(tokens_len)}, with errors bars")
-    avg_attention_bins_plt_mask = plot_bins_attention_scores_mean(mean_attention_bins_layers, var_attention_bins_layers, title=f"Average attention score [mask]$\longrightarrow$[mask] attention\nNo. samples={len(tokens_len)}", mask_to_mask=True)
+    avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers, SE_attention_bins_layers, title=f"Average attention score for sentence in bins\nNo. samples={len(tokens_len)}, with errors bars")
+    avg_attention_bins_plt_mask = plot_bins_attention_scores_mean(mean_attention_bins_layers, SE_attention_bins_layers, title=f"Average attention score [mask]$\longrightarrow$[mask] attention\nNo. samples={len(tokens_len)}", mask_to_mask=True)
 
     save = True
     if save: 
