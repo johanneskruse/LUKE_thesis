@@ -136,7 +136,7 @@ You don't have to run all of them. Plots are only generated for the hyperparamet
 ## Confusion matrix: 
 To quantify the performance of a single experiment using confusion matrices:
 ```
-python luke_experiments.confusion_matrix --data-dir=<DATA_DIR> --cm-output-dir=<OUTPUT_DIR>
+python luke_experiments/confusion_matrix.py --data-dir=<DATA_DIR> --cm-output-dir=<OUTPUT_DIR>
 ```
 
 Here, ```--data-dir``` and ```--cm-output-dir``` are the paths for the data and the output directory. Add ´--no-save-cm´ if you don't want to save save the confusion matrices. 
@@ -144,7 +144,7 @@ Here, ```--data-dir``` and ```--cm-output-dir``` are the paths for the data and 
 ## Plotting meta-analysis for different experimental settings:
 By running: 
 ```
-python -m luke_experiments.meta_analysis --data-dir <path/to/experiment_output>
+python luke_experiments/meta_analysis.py --data-dir=<path/to/experiment_output> --output-dir=<OUTPUT_DIR>
 ```
 
 Here ```--data-dir``` is the path to the experiments that contain all folders with experiments. Thus, in an experiment multiple experiment folder exists, where each of them contain a result.json file ([robust_seed_1, robust_seed_2, robust_seed_3, etc.)
@@ -166,7 +166,6 @@ tensorboard --logdir <luke_experiments/plots_meta_analysis/runs_tensorboards>
 ```
 
 This is the default output path from ```meta_analysis.py```.
-
 
 # Visualization Attention
 
