@@ -33,9 +33,6 @@
 source ~/.bashrc
 conda activate luke
 
-# python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=data/outputs/check_point_file/gender_bias entity-typing run --data-dir=data/outputs/check_point_file/gender_bias --checkpoint-file=data/check_point_files/OpenEntity_reconstructed/pytorch_model.bin --output-attentions --eval-batch-size=1 --no-train
-python visual_attention/tests/visualization_attention_all_sentence_bins.py
-
 # ============================================================
 #   Run experiments
 # ============================================================
