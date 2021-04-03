@@ -14,6 +14,12 @@ predict_file_dir = f"../data/check_point_file/{set_}_predictions.jsonl"
 result_file = "../data/check_point_file/results.json"
 
 
+# data_file_dir = f"/Users/johanneskruse/Desktop/OpenEntity_manipulate_input/{set_}.json"
+# predict_file_dir = f"/Users/johanneskruse/Desktop/OpenEntity_manipulate_input/{set_}_predictions.jsonl"
+# result_file = "/Users/johanneskruse/Desktop/OpenEntity_manipulate_input/results.json"
+
+
+
 def entity_present(dict_, entity_name):
     entity = 0 
     label = []
@@ -78,7 +84,6 @@ def count_entity_types(list_entity_labels):
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
 
 
 # data_file_dir = f"../data/check_point_file/z_switch_data_sets/{set_}/{set_}.json"
