@@ -323,18 +323,101 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
     
     return global_mean_in_bin
 
+
+def attention_to_entity(data_dir, eval_set = "test", mask_index = -2):
+    
+    def entity_layer_mean(attention, entity_idx, mask_index=-2):
+        layer_mean = []
+        for layer in attention:
+            head_mean = []
+            for head in layer:
+                temp_mean_head_attn = []
+                if entity_idx[0] is not entity_idx[1]:
+                    for i in range(entity_idx[0], entity_idx[1]+1):
+                        temp_mean_head_attn.append(head[mask_index][i])
+                else: 
+                    temp_mean_head_attn.append(head[mask_index][entity_idx[0]])
+                head_mean.append(np.mean(temp_mean_head_attn))
+            layer_mean.append(np.mean(head_mean))
+        return layer_mean
+
+    def entity_index(tokens):
+        index = []
+        for i, token in enumerate(tokens): 
+            if token == "[ENTITY]": 
+                index.append(i)
+        
+        index[0] = index[0]+1 
+        index[1] = index[1]-1 
+        
+        # if index[0] == index[1]:
+        #     index = index[0]
+
+        return index
+
+    #for eval_set in eval_sets:
+    mean_attention_layer_mask_to_entity_2 = {}
+    mean_attention_layer_mask_to_entity_rest = {}
+    data = pickle.load(open( os.path.join(data_dir, f"output_attentions_{eval_set}.p"), "rb"))
+
+    # mask to entity
+    for sent in data: 
+        tokens = data[sent]["tokens"]
+        attention = data[sent]["attention"]
+        entity_idx = entity_index(tokens)
+        mask_to_entity_attn = entity_layer_mean(attention, entity_idx, mask_index)
+        if entity_idx[0] is 2:
+            mean_attention_layer_mask_to_entity_2[sent] = mask_to_entity_attn
+        else:
+            mean_attention_layer_mask_to_entity_rest[sent] = mask_to_entity_attn
+        
+    return mean_attention_layer_mask_to_entity_2, mean_attention_layer_mask_to_entity_rest
+
+
+def plot_mask_to_entity(attn2entity_2_dict, title="[MASK]$\longrightarrow$[ENTITY]"):
+
+    attn_val_mean = []
+    for i, attn_val in enumerate(attn2entity_2_dict.values()): 
+        if i is 0: 
+            attn_val_mean = np.array(attn_val)
+        else: 
+            attn_val_mean = attn_val_mean + np.array(attn_val)    
+    attn_val_mean = attn_val_mean/(i+1)
+
+    number_of_layers = len(attn_val_mean)
+
+    figure, ax = plt.subplots(figsize=(12,9))
+
+    for example in attn2entity_2_dict.values():
+        ax.plot(range(len(attn_val_mean)), example)
+    ax.plot(range(len(attn_val_mean)), attn_val_mean, 'go--', linewidth=2, markersize=12, label="Mean attention curve")
+
+    ax.set_title(title, size="x-large") 
+    ax.set_xlabel("Layer", fontsize="large")
+    ax.set_ylabel("Attention score", fontsize="large")
+    ax.set_xticks(range(0, number_of_layers, 2))
+    ax.set_xticklabels(range(0,number_of_layers, 2))
+    plt.legend()
+    plt.tick_params(axis='x', labelsize="large")
+    plt.tick_params(axis='y', labelsize="large")
+    plt.grid()
+    plt.tight_layout()
+
+    return figure
+    
+
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
 data_dir = "/Users/johanneskruse/Desktop/dev_test"
 output_dir = "plot_attention_visualization"
-number_of_bins = 5
+number_of_bins = 4
 
 # data_dir = "data/outputs/output_attentions_full_dev_test"
 # output_dir = "visual_attention/tests/plot_attention_visualization"
 
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
-
+            
 
 for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32: 142, 33: 145, 34: 135, 35: 150
     # Get attention scores in bins, mean of each bin, the len of all tokens, and the bin names: 
@@ -358,6 +441,7 @@ for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32
     avg_attention_bins_plt = plot_bins_attention_scores_mean(mean_attention_bins_layers, SE_attention_bins_layers, title=f"Average attention score for sentence in bins\nNo. samples={len(tokens_len)}, with errors bars")
     avg_attention_bins_plt_mask = plot_bins_attention_scores_mean(mean_attention_bins_layers, SE_attention_bins_layers, title=f"Average attention score [mask]$\longrightarrow$[mask] attention\nNo. samples={len(tokens_len)}", mask_to_mask=True)
 
+
     save = True
     if save: 
         print(f"saving plots... {output_dir}")
@@ -370,6 +454,17 @@ for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32
         with open(f"{output_dir}/sentences_{number_of_bins}", 'w') as filehandle:
             for listitem in sentences:
                 filehandle.write('%s\n' % listitem)
+
+
+        for eval_set in ["dev", "test"]:
+            attn_MASK_to_ENTITY_position_2, attn_MASK_to_ENTITY_position_rest = attention_to_entity(data_dir, eval_set=eval_set)
+            plot_mask_to_entity_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_2, title=f"Position: only 2 ({eval_set})\n[MASK]$\longrightarrow$[ENTITY]")
+            plot_mask_to_entity_not_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_rest, title=f"Position: exclude 2 ({eval_set})\n[MASK]$\longrightarrow$[ENTITY]")
+        
+        plot_mask_to_entity_2.savefig(f"{output_dir}/plot_mask_to_entity_2_bins_{number_of_bins}", dpi=dpi)
+        plot_mask_to_entity_not_2.savefig(f"{output_dir}/plot_mask_to_entity_not_2_bins_{number_of_bins}", dpi=dpi)
+
+
 
 
 # =============================================================== #

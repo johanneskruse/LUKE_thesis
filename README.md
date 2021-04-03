@@ -162,7 +162,7 @@ The default is True.
 Run tensorboard: 
 
 ```bash
-tensorboard --logdir <luke_experiments/plots_meta_analysis/runs_tensorboards>
+tensorboard --logdir=<luke_experiments/plots_meta_analysis/runs_tensorboards>
 ```
 
 This is the default output path from ```meta_analysis.py```.
@@ -179,7 +179,15 @@ We provide two Jupyter Notebooks *Head View* and *Model View*, respectively. We 
 To generate your own output_attentions.p file for visualisation run:
 
 ```
-python -m examples.cli --model-file=luke_large_500k.tar.gz --output-dir=<OUTPUT_DIR> entity-typing run --data-dir=<DATA_DIR> --checkpoint-file=<CHECKPOINT_DIR> --output-attentions --eval-batch-size=1 --no-train
+python -m examples.cli \
+    --model-file=luke_large_500k.tar.gz \
+    --output-dir=<OUTPUT_DIR> \
+    entity-typing run \
+    --data-dir=<DATA_DIR> \
+    --checkpoint-file=<CHECKPOINT_DIR> \
+    --output-attentions \
+    --eval-batch-size=1 \
+    --no-train
 ```
 
 This will generate the pickle file output_attentions.p which contains the “tokens”, “sentence”, and the “attention”. 

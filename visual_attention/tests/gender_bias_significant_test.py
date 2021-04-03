@@ -4,6 +4,10 @@ from bertviz.util import attention_token2token, plot_attention_token2token, form
 import pickle
 import numpy as np
 from scipy import stats
+import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 30, 'legend.fontsize': 20})
+plt.rc('font', size=25)
+plt.rc('axes', titlesize=25)
 
 def read_file_return_names(data_dir):
     f = open( f"{data_dir}", "r")
@@ -59,6 +63,28 @@ def unparied_significant_test(samples_mean_in_layers_girls, samples_mean_in_laye
     _, p_val = stats.ttest_ind(means_girl, means_boy)
     return p_val, mean_girl, mean_boy, var_girl, var_boy
 
+
+def plot_histrogram(samples_mean_in_layers_girls, samples_mean_in_layers_boys, title="Density Histrogram", bins = 15, loc="best", alpha=0.5, output_dir=None):
+    means_boy = [np.mean(sample) for sample in samples_mean_in_layers_boys.values()]
+    means_girl = [np.mean(sample) for sample in samples_mean_in_layers_girls.values()]
+
+    figure, ax = plt.subplots(figsize=(12,9))
+
+    ax.hist(means_boy, bins=bins, alpha=alpha, label=f'Male: ($\mu$={np.mean(means_boy):.3f}, $\sigma^2$={np.var(means_boy)*10**5:.2f}e-5)', density=True)
+    ax.hist(means_girl, bins=bins, alpha=alpha, label=f'Female ($\mu$={np.mean(means_girl):.3f}, $\sigma^2$={np.var(means_girl)*10**5:.2f}e-5)', density=True)
+    ax.set_xlabel("Accumulated attention scores")
+    ax.set_ylabel("A.U.")
+    
+    ax.legend(loc=loc)
+    ax.set_title(title, size="x-large") 
+
+    if output_dir: 
+        dpi = 300
+        figure.savefig(output_dir, dpi=dpi)
+
+    return figure
+
+
 # =============================================================== #
 
 data_dir = "/Users/johanneskruse/Desktop/gender_bias_output_attention"
@@ -93,6 +119,7 @@ dn_gender_doctor_pval, dn_gender_doctor_mean_girl, dn_gender_doctor_mean_boy, dn
 print(f"(doctor, nurse): name -> doctor\np-value: {dn_gender_doctor_pval}")
 print(f"mean [girl, boy]: [{dn_gender_doctor_mean_girl}, {dn_gender_doctor_mean_boy}]")
 print(f"var [girl, boy]: [{dn_gender_doctor_var_girl}, {dn_gender_doctor_var_boy}]")
+dn_gender_doctor_hist = plot_histrogram(dn_girl_doctor_attn, dn_boy_doctor_attn, title = f"(doctor, nurse), [group]$\longrightarrow$[doctor]\np-value: {dn_gender_doctor_pval:.02}", output_dir="/Users/johanneskruse/Desktop/dn_gender_doctor_hist.png")
 
 # (doctor, nurse): name -> nurse
 _, dn_girl_nurse_attn = attention_scores_token_or_entity_heads_and_mean(data=doctor_nurse_girl_names, name_list=girl_names, token1=None, token2="nurse", token1_index=-5)
@@ -101,6 +128,7 @@ dn_gender_nurse_pval, dn_gender_nurse_mean_girl, dn_gender_nurse_mean_boy, dn_ge
 print(f"(doctor, nurse): name -> nurse\np-value: {dn_gender_nurse_pval}")
 print(f"mean [girl, boy]: [{dn_gender_nurse_mean_girl}, {dn_gender_nurse_mean_boy}]")
 print(f"var [girl, boy]: [{dn_gender_nurse_var_girl}, {dn_gender_nurse_var_boy}]")
+dn_gender_nurse_hist = plot_histrogram(dn_girl_nurse_attn, dn_boy_nurse_attn, title = f"(doctor, nurse), [group]$\longrightarrow$[nurse]\np-value: {dn_gender_nurse_pval:.04}", output_dir="/Users/johanneskruse/Desktop/dn_gender_nurse_hist.png")
 
 # =============================================================== #
 # ############### (nurse, doctor) ###############
@@ -111,6 +139,8 @@ nd_gender_doctor_pval, nd_gender_doctor_mean_girl, nd_gender_doctor_mean_boy, nd
 print(f"(nurse, doctor): name -> doctor\np-value: {nd_gender_doctor_pval}")
 print(f"mean [girl, boy]: [{nd_gender_doctor_mean_girl}, {nd_gender_doctor_mean_boy}]")
 print(f"var [girl, boy]: [{nd_gender_doctor_var_girl}, {nd_gender_doctor_var_boy}]")
+nd_gender_doctor_hist = plot_histrogram(nd_girl_doctor_attn, nd_boy_doctor_attn, title = f"(nurse, doctor), [group]$\longrightarrow$[doctor]\np-value: {nd_gender_doctor_pval:.01}", output_dir="/Users/johanneskruse/Desktop/nd_gender_doctor_hist.png")
+
 
 # (nurse, doctor): name -> nurse
 _, nd_girl_nurse_attn = attention_scores_token_or_entity_heads_and_mean(data=nurse_doctor_girl_names, name_list=girl_names, token1=None, token2="nurse", token1_index=-5)
@@ -119,7 +149,14 @@ nd_gender_nurse_pval, nd_gender_nurse_mean_girl, nd_gender_nurse_mean_boy, nd_ge
 print(f"(nurse, doctor): name -> nurse\np-value: {nd_gender_nurse_pval}")
 print(f"mean [girl, boy]: [{nd_gender_nurse_mean_girl}, {nd_gender_nurse_mean_boy}]")
 print(f"var [girl, boy]: [{nd_gender_nurse_var_girl}, {nd_gender_nurse_var_boy}]")
+nd_gender_nurse_hist = plot_histrogram(nd_girl_nurse_attn, nd_boy_nurse_attn, title = f"(nurse, doctor), [group]$\longrightarrow$[nurse]\np-value: {nd_gender_nurse_pval:.01}", output_dir="/Users/johanneskruse/Desktop/nd_gender_nurse_hist.png")
 
+
+
+dn_gender_doctor_hist
+dn_gender_nurse_hist
+nd_gender_doctor_hist
+nd_gender_nurse_hist
 
 for i, sample in enumerate(nd_boy_nurse_attn.values()): 
     if i == 0:
