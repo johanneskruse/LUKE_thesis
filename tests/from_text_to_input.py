@@ -7,11 +7,11 @@ import json
 # from_text_to_input.json format: {"sentX" : "this is a test for <entity>"} --> put < > arount entity
 # ```
 
-data_dir = "tests/from_text_to_input_gender_bias_names.json"
-output_dir = "data/outputs/check_point_file/gender_bias"
+# data_dir = "tests/from_text_to_input_gender_bias_names.json"
+# output_dir = "data/outputs/check_point_file/gender_bias"
 
-# data_dir = "tests/from_text_to_input.json"
-# output_dir = "data/outputs/check_point_file/OpenEntity_manipulate_input"
+data_dir = "tests/from_text_to_input.json"
+output_dir = "data/outputs/check_point_file/OpenEntity_manipulate_input"
 
 with open(data_dir) as json_file:
     data = json.load(json_file)
