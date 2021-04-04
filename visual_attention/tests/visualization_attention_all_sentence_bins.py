@@ -324,7 +324,7 @@ def get_global_mean_attention_bins(mean_attention_bins_layers, output_dir=".", s
     return global_mean_in_bin
 
 
-def attention_to_entity(data_dir, eval_set = "test", mask_index = -2):
+def attention_to_entity(data_dir, eval_set = "test", mask_index = -2, include_only_token_len=None):
     
     def entity_layer_mean(attention, entity_idx, mask_index=-2):
         layer_mean = []
@@ -363,6 +363,11 @@ def attention_to_entity(data_dir, eval_set = "test", mask_index = -2):
     # mask to entity
     for sent in data: 
         tokens = data[sent]["tokens"]
+        number_of_tokens = len(tokens)
+        if include_only_token_len is not None:
+            if number_of_tokens is not include_only_token_len:
+                continue
+        
         attention = data[sent]["attention"]
         entity_idx = entity_index(tokens)
         mask_to_entity_attn = entity_layer_mean(attention, entity_idx, mask_index)
@@ -408,12 +413,12 @@ def plot_mask_to_entity(attn2entity_2_dict, title="[MASK]$\longrightarrow$[ENTIT
 
 # =============================================================== #
 # data_dir = "/Users/johanneskruse/Desktop/output_attentions_full_dev_test"
-data_dir = "/Users/johanneskruse/Desktop/dev_test"
-output_dir = "plot_attention_visualization"
-number_of_bins = 4
+# data_dir = "/Users/johanneskruse/Desktop/dev_test"
+# output_dir = "plot_attention_visualization"
+# number_of_bins = 4
 
-# data_dir = "data/outputs/output_attentions_full_dev_test"
-# output_dir = "visual_attention/tests/plot_attention_visualization"
+data_dir = "data/outputs/output_attentions_full_dev_test"
+output_dir = "visual_attention/tests/plot_attention_visualization"
 
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
@@ -455,11 +460,18 @@ for number_of_bins in tqdm([2, 4, 8, 16, 35, 50, 64, 72, 84, 97, 98, 114]): # 32
             for listitem in sentences:
                 filehandle.write('%s\n' % listitem)
 
-
+    save_mask_to_entity = True
+    if save_mask_to_entity:
         for eval_set in ["dev", "test"]:
-            attn_MASK_to_ENTITY_position_2, attn_MASK_to_ENTITY_position_rest = attention_to_entity(data_dir, eval_set=eval_set)
-            plot_mask_to_entity_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_2, title=f"Position: only 2 ({eval_set})\n[MASK]$\longrightarrow$[ENTITY]")
-            plot_mask_to_entity_not_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_rest, title=f"Position: exclude 2 ({eval_set})\n[MASK]$\longrightarrow$[ENTITY]")
+            if number_of_bins in [35, 50, 64, 72]:
+                attn_MASK_to_ENTITY_position_2, attn_MASK_to_ENTITY_position_rest = attention_to_entity(data_dir, eval_set=eval_set, include_only_token_len=number_of_bins)
+                plot_mask_to_entity_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_2, title=f"Position: only 2 ({eval_set}, bins: {number_of_bins})\n[MASK]$\longrightarrow$[ENTITY]")
+                plot_mask_to_entity_not_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_rest, title=f"Position: exclude 2 ({eval_set}, bins: {number_of_bins})\n[MASK]$\longrightarrow$[ENTITY]")
+            else:
+                attn_MASK_to_ENTITY_position_2, attn_MASK_to_ENTITY_position_rest = attention_to_entity(data_dir, eval_set=eval_set)
+                plot_mask_to_entity_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_2, title=f"Position: only 2 ({eval_set}, bins: {number_of_bins})\n[MASK]$\longrightarrow$[ENTITY]")
+                plot_mask_to_entity_not_2 = plot_mask_to_entity(attn_MASK_to_ENTITY_position_rest, title=f"Position: exclude 2 ({eval_set}, bins: {number_of_bins})\n[MASK]$\longrightarrow$[ENTITY]")
+                
         
         plot_mask_to_entity_2.savefig(f"{output_dir}/plot_mask_to_entity_2_bins_{number_of_bins}", dpi=dpi)
         plot_mask_to_entity_not_2.savefig(f"{output_dir}/plot_mask_to_entity_not_2_bins_{number_of_bins}", dpi=dpi)
