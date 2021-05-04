@@ -1,6 +1,6 @@
 # Hello! 
 
-This repo is part of the Thesis project *'Entity-aware representations for natural language processing'* at the Technical University of Denmark (DTU), with all plots in regard to LUKE originating from here.
+This repo is part of the Thesis project *['Entity-aware representations for natural language processing'](https://findit.dtu.dk/en/catalog/2686501851)* at the Technical University of Denmark (DTU), with all plots in regard to LUKE originating from here.
 
 In this project we set out to explore entity-aware representations for natural language processing based on language models. On that quest, we discovered the pre-trained language model LUKE.
 
